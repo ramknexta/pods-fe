@@ -1,6 +1,6 @@
-import {lazy, Suspense} from "react";
+import {lazy, Suspense, useEffect} from "react";
 import user from "../utils/constants.js";
-import {Navigate, Route, Routes} from "react-router-dom";
+import {Navigate, Route, Routes, useNavigate} from "react-router-dom";
 import {useSelector} from "react-redux";
 import Line from "../components/loader/Line.jsx";
 
@@ -17,6 +17,18 @@ const Support = lazy(() => import('../pages/support/index.jsx'))
 const Report = lazy(() => import('../pages/report/index.jsx'))
 const History = lazy(() => import('../pages/history/index.jsx'))
 
+// Temporary placeholder components for new routes
+const AddBranch = lazy(() => import('../pages/branch-management/index.jsx'))
+const AddCustomer = () => {
+    const navigate = useNavigate();
+    useEffect(() => {
+        navigate('/onboarding?customer=true');
+    }, [navigate]);
+    return null;
+};
+const AddRooms = () => <div className="p-6"><h1 className="text-2xl font-bold">Add Rooms</h1><p className="mt-4">Add Rooms functionality coming soon...</p></div>
+const Onboarding = lazy(() => import('../pages/onboarding/index.jsx'))
+
 const preLoginRoutes = [
     {
         component: Login,
@@ -30,6 +42,26 @@ const adminRoutes = [
         component: AdminDashboard,
         path:'/dashboard',
         title: 'Admin Dashboard'
+    },
+    {
+        component: AddBranch,
+        path:'/branch-management',
+        title: 'Branch Management'
+    },
+    {
+        component: AddCustomer,
+        path:'/add-customer',
+        title: 'Add Customer'
+    },
+    {
+        component: AddRooms,
+        path:'/add-rooms',
+        title: 'Add Rooms'
+    },
+    {
+        component: Onboarding,
+        path:'/onboarding',
+        title: 'Onboarding'
     },
     {
         component: Pod,
@@ -85,15 +117,17 @@ export const AppRoutes = () => {
 
     const { role, token } = useSelector(state => state.auth);
 
-    const isAuthenticated = !!token;
+    // Temporarily bypass authentication for development
+    const isAuthenticated = true; // !!token; // Commented out for development
+    const mockRole = user.ADMIN; // Set to ADMIN or CUSTOMER as needed
 
     let routes = preLoginRoutes;
 
-    console.log(role)
+    console.log('Current role:', role || mockRole)
 
-    if (isAuthenticated && user.ADMIN === role) {
+    if (isAuthenticated && (role === user.ADMIN || mockRole === user.ADMIN)) {
         routes = adminRoutes;
-    } else if (isAuthenticated && user.CUSTOMER === role) {
+    } else if (isAuthenticated && (role === user.CUSTOMER || mockRole === user.CUSTOMER)) {
         routes = customerRoutes;
     }
 

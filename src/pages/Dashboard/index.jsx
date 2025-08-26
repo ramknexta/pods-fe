@@ -1,33 +1,42 @@
 import Admin from "../../layout/Admin.jsx";
 import { Icon } from "@iconify/react";
 import { useState } from "react";
+import BranchesCarousel from "../../components/BranchesCarousel.jsx";
+import CustomersCarousel from "../../components/CustomersCarousel.jsx";
 
 const Dashboard = () => {
     const stats = [
         {
-            label: "Total Pods",
-            value: 6,
+            label: "Total Branches",
+            value: 8,
             icon: <Icon icon='mdi:office-building' className="w-6 h-6 text-purple-500" />,
             change: "+2 since last week",
             trend: "up"
         },
         {
+            label: "Total Pods",
+            value: 24,
+            icon: <Icon icon='mdi:view-grid' className="w-6 h-6 text-blue-500" />,
+            change: "+6 since last week",
+            trend: "up"
+        },
+        {
             label: "Available",
-            value: 3,
+            value: 12,
             icon: <Icon icon='mdi:check-circle' className="w-6 h-6 text-green-500" />,
             change: "-1 since yesterday",
             trend: "down"
         },
         {
             label: "Booked",
-            value: 1,
-            icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-blue-500" />,
-            change: "No change",
-            trend: "neutral"
+            value: 8,
+            icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-orange-500" />,
+            change: "+2 since yesterday",
+            trend: "up"
         },
         {
             label: "Maintenance",
-            value: 2,
+            value: 4,
             icon: <Icon icon='mdi:tools' className="w-6 h-6 text-red-500" />,
             change: "+1 since yesterday",
             trend: "up"
@@ -89,7 +98,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
                     {stats.map((stat, i) => (
                         <div
                             key={i}
@@ -118,6 +127,12 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
+
+                {/* Branches Carousel Section */}
+                <BranchesCarousel />
+
+                {/* Customers Carousel Section */}
+                <CustomersCarousel />
 
                 {/* Table Section */}
                 <div className="max-h-96 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

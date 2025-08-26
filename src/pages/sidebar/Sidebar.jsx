@@ -16,6 +16,21 @@ const Sidebar = () => {
             icon: 'tdesign:calendar-2-filled'
         },
         {
+            label: 'Add Branch',
+            path: '/branch-management',
+            icon: 'mdi:office-building-plus'
+        },
+        {
+            label: 'Add Customer',
+            path: '/add-customer',
+            icon: 'mdi:account-plus'
+        },
+        {
+            label: 'Add Rooms',
+            path: '/add-rooms',
+            icon: 'mdi:room-plus'
+        },
+        {
             label: 'Pod',
             path: '/pod',
             icon: 'tdesign:dashboard-filled'

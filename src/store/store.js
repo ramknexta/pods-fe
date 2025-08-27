@@ -3,6 +3,7 @@ import {rootReducer} from "./rootReducer.js";
 import {authApi} from "./slices/auth/authApi.js";
 import {persistStore} from "redux-persist";
 import {managementApi} from "./slices/management/managementApi.jsx";
+import {onboardApi} from "./slices/onboard/onboardApi.js";
 
 const store = configureStore({
     reducer: rootReducer,
@@ -12,6 +13,7 @@ const store = configureStore({
         }).concat(
             authApi.middleware,
             managementApi.middleware,
+            onboardApi.middleware,
         ),
 })
 

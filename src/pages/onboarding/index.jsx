@@ -1,294 +1,337 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import {useCallback, useEffect, useMemo, useState} from 'react';
 import { Icon } from '@iconify/react';
+import Admin from "../../layout/Admin.jsx";
+import {useFetchDashboardDataQuery, useFetchRoomByBranchIdQuery} from "../../store/slices/management/managementApi.jsx";
+import {useOnboardCustomerMutation} from "../../store/slices/onboard/onboardApi.js";
+import Contact from "./Contact.jsx";
+import BusinessDetails from "./BusinessDetails.jsx";
+import RoomBooking from "./RoomBooking.jsx";
+import Review from "./Review.jsx";
+import Company from "./Company.jsx";
 
-const Onboarding = () => {
-    const [searchParams] = useSearchParams();
-    const isCustomer = searchParams.get('customer') === 'true';
+const STEP_CONFIG = [
+    { id: 1, title: 'Company Info', icon: 'mdi:office-building' },
+    { id: 2, title: 'Contact Details', icon: 'mdi:account' },
+    { id: 3, title: 'Business Info', icon: 'mdi:file-document' },
+    { id: 4, title: 'Room Booking', icon: 'mdi:desk' },
+    { id: 5, title: 'Review', icon: 'mdi:check-circle' }
+];
+
+const initialFormData = {
+    name: '',
+    email: '',
+    website: '',
+    wiki: '',
+    logo: '',
+    addr1: '',
+    addr2: '',
+    duns: '',
+    gstin: '',
+    first_name: '',
+    middle_name: '',
+    last_name: '',
+    contact_email: '',
+    mobile: '',
+    gst_typ: 'cgst/sgst',
+    mgmt_id: '',
+    branch_id: '',
+    location: '',
+    state: '',
+    pincode: '',
+    country: 'India',
+    e_invoicing: false,
+    workflow: true,
+    is_invoice: false,
+    workflow_name: 'default',
+    description: '',
+    before: {
+        days: 0,
+        remainder: 0,
+        frequency: 0,
+    },
+    after: {
+        days: 0,
+        remainder: 0,
+        frequency: 0,
+    },
+    room_booking: null
+};
+
+const CustomerOnboarding = () => {
     const [currentStep, setCurrentStep] = useState(1);
-    const [formData, setFormData] = useState({
-        firstName: '',
-        lastName: '',
-        email: '',
-        phone: '',
-        company: '',
-        branch: '',
-        role: ''
+    const [formData, setFormData] = useState(initialFormData);
+
+    const [errors, setErrors] = useState({});
+    const [roomSelection, setRoomSelection] = useState({
+        booking_type: 'monthly',
+        start_date: '',
+        end_date: '',
+        rooms: []
     });
 
-    const steps = [
-        { id: 1, title: 'Personal Information', icon: 'mdi:account' },
-        { id: 2, title: 'Company Details', icon: 'mdi:office-building' },
-        { id: 3, title: 'Preferences', icon: 'mdi:cog' },
-        { id: 4, title: 'Review & Submit', icon: 'mdi:check-circle' }
-    ];
+    const [onboardCustomer, { isLoading: isSubmitting }] = useOnboardCustomerMutation();
+    const { data: managementData } = useFetchDashboardDataQuery();
+
+    const { branches = [] } = managementData || {};
+
+    const { data: fetchRoomByBranch } = useFetchRoomByBranchIdQuery(
+        formData.branch_id,
+        { skip: !formData.branch_id }
+    );
+
+    const roomTypes = useMemo(() => fetchRoomByBranch?.data || [], [fetchRoomByBranch]);
+
+    const validateStep = (step) => {
+        const newErrors = {};
+
+        if (step === 1) {
+            if (!formData.name) newErrors.name = 'Company name is required';
+            if (!formData.email) newErrors.email = 'Email is required';
+            else if (!/\S+@\S+\.\S+/.test(formData.email)) newErrors.email = 'Email is invalid';
+
+            // GST validation based on country
+            if (formData.country === 'India' && !formData.gstin) {
+                newErrors.gstin = 'GSTIN is required for India';
+            } else if (formData.country === 'India' && formData.gstin) {
+                const gstRegex = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[A-Z0-9]{3}$/;
+                if (!gstRegex.test(formData.gstin)) newErrors.gstin = 'Invalid GSTIN format';
+            }
+        }
+
+        if (step === 2) {
+            if (!formData.first_name) newErrors.first_name = 'First name is required';
+            if (!formData.last_name) newErrors.last_name = 'Last name is required';
+            if (!formData.contact_email) newErrors.contact_email = 'Contact email is required';
+            else if (!/\S+@\S+\.\S+/.test(formData.contact_email)) newErrors.contact_email = 'Contact email is invalid';
+            if (!formData.mobile) newErrors.mobile = 'Mobile number is required';
+        }
+
+        if (step === 3) {
+            if (!formData.country) newErrors.country = 'Country is required';
+            if (!formData.branch_id) newErrors.branch_id = 'Branch ID is required';
+        }
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
+        const { name, value, type, checked } = e.target;
         setFormData(prev => ({
             ...prev,
-            [name]: value
+            [name]: type === 'checkbox' ? checked : value
         }));
-    };
 
-    const handleNext = () => {
-        if (currentStep < steps.length) {
-            setCurrentStep(currentStep + 1);
+        // Clear error when user starts typing
+        if (errors[name]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[name];
+                return newErrors;
+            });
         }
     };
 
-    const handlePrevious = () => {
-        if (currentStep > 1) {
-            setCurrentStep(currentStep - 1);
+    const handleRoomSelection = (roomId, quantity = 1) => {
+        const room = roomTypes.find(r => r.id === roomId);
+        if (!room) return;
+
+        setRoomSelection(prev => {
+            const existingIndex = prev.rooms.findIndex(r => r.room_id === roomId);
+            let newRooms = [...prev.rooms];
+
+            const rate = prev.booking_type === 'monthly' ? room.monthly_cost : room.hourly_cost;
+
+            if (existingIndex >= 0) {
+                if (quantity === 0) {
+                    newRooms.splice(existingIndex, 1); // remove
+                } else {
+                    newRooms[existingIndex] = {
+                        ...newRooms[existingIndex],
+                        quantity_booked: quantity,
+                        rate
+                    };
+                }
+            } else if (quantity > 0) {
+                newRooms.push({
+                    room_id: room.id,
+                    room_name: room.room_name,
+                    room_type: room.room_type,
+                    quantity_booked: quantity,
+                    rate,
+                    discount_applied: 0,
+                    hsn: 998313,
+                    auto_priced: true,
+                    allocation_type: room.allocation_type === 'seater' ? 'partial_seats' : 'full_room'
+                });
+            }
+
+            return { ...prev, rooms: newRooms };
+        });
+    };
+
+    const calculateTotal = useMemo(() => {
+        return roomSelection.rooms.reduce((total, room) => {
+            const roomDetails = roomTypes.find(r => r.id === room.room_id);
+            if (!roomDetails) return total;
+
+            const rate = roomSelection.booking_type === 'monthly'
+                ? parseFloat(roomDetails.monthly_cost)
+                : parseFloat(roomDetails.hourly_cost);
+
+            return total + (rate * room.quantity_booked);
+        }, 0);
+    }, [roomSelection, roomTypes]);
+
+    const handleNext = useCallback(() => {
+        // if (validateStep(currentStep)) {
+        //     if (currentStep === 4) {
+        //         // Prepare room booking data for submission
+        //         setFormData(prev => ({
+        //             ...prev,
+        //             room_booking: {
+        //                 booking_type: roomSelection.booking_type,
+        //                 start_date: roomSelection.start_date,
+        //                 end_date: roomSelection.end_date,
+        //                 total_amount: calculateTotal,
+        //                 rooms: roomSelection.rooms
+        //             }
+        //         }));
+        //     }
+        //     setCurrentStep(currentStep + 1);
+        // }
+        setCurrentStep(currentStep + 1);
+    },[currentStep, formData, roomSelection, calculateTotal]);
+
+    const handlePrevious = useCallback(() => {
+        setCurrentStep(prev => prev - 1);
+    }, []);
+
+
+
+    const handleSubmit = useCallback(async () => {
+        try {
+            const payload = {
+                customer: [{...formData, mgmt_id: branches[0]?.mgmt_id || ''}],
+                rule: false,
+                invoice: false
+            };
+
+            const response = await onboardCustomer(payload).unwrap();
+            console.log('Onboarding successful:', response);
+        } catch (error) {
+            console.error('Onboarding failed:', error);
         }
-    };
+    }, [formData, branches, onboardCustomer]);
 
-    const handleSubmit = () => {
-        console.log('Onboarding data:', formData);
-        // Here you would typically send the data to your backend
-        alert('Onboarding completed successfully!');
-    };
+    const renderStepContent = useCallback(() => {
+        const stepProps = {
+            formData,
+            handleInputChange,
+            errors,
+            branches
+        };
 
-    const renderStepContent = () => {
         switch (currentStep) {
             case 1:
-                return (
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-800">Personal Information</h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
-                                <input
-                                    type="text"
-                                    name="firstName"
-                                    value={formData.firstName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter first name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
-                                <input
-                                    type="text"
-                                    name="lastName"
-                                    value={formData.lastName}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter last name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                                <input
-                                    type="email"
-                                    name="email"
-                                    value={formData.email}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter email address"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
-                                <input
-                                    type="tel"
-                                    name="phone"
-                                    value={formData.phone}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter phone number"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
+                return <Company {...stepProps} />;
             case 2:
-                return (
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-800">Company Details</h3>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Company Name</label>
-                                <input
-                                    type="text"
-                                    name="company"
-                                    value={formData.company}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter company name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Branch</label>
-                                <input
-                                    type="text"
-                                    name="branch"
-                                    value={formData.branch}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter branch name"
-                                />
-                            </div>
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-                                <input
-                                    type="text"
-                                    name="role"
-                                    value={formData.role}
-                                    onChange={handleInputChange}
-                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                    placeholder="Enter your role"
-                                />
-                            </div>
-                        </div>
-                    </div>
-                );
+                return <Contact {...stepProps} />;
             case 3:
-                return (
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-800">Preferences</h3>
-                        <div className="space-y-4">
-                            <div className="flex items-center space-x-3">
-                                <input type="checkbox" id="notifications" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <label htmlFor="notifications" className="text-sm text-gray-700">Receive email notifications</label>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <input type="checkbox" id="marketing" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <label htmlFor="marketing" className="text-sm text-gray-700">Receive marketing communications</label>
-                            </div>
-                            <div className="flex items-center space-x-3">
-                                <input type="checkbox" id="terms" className="rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
-                                <label htmlFor="terms" className="text-sm text-gray-700">I agree to the terms and conditions</label>
-                            </div>
-                        </div>
-                    </div>
-                );
+                return <BusinessDetails {...stepProps} />;
             case 4:
                 return (
-                    <div className="space-y-6">
-                        <h3 className="text-lg font-semibold text-gray-800">Review & Submit</h3>
-                        <div className="bg-gray-50 p-4 rounded-lg space-y-3">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div>
-                                    <p className="text-sm text-gray-500">Name</p>
-                                    <p className="font-medium">{formData.firstName} {formData.lastName}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Email</p>
-                                    <p className="font-medium">{formData.email}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Phone</p>
-                                    <p className="font-medium">{formData.phone}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Company</p>
-                                    <p className="font-medium">{formData.company}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Branch</p>
-                                    <p className="font-medium">{formData.branch}</p>
-                                </div>
-                                <div>
-                                    <p className="text-sm text-gray-500">Role</p>
-                                    <p className="font-medium">{formData.role}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                    <RoomBooking
+                        {...stepProps}
+                        roomTypes={roomTypes}
+                        roomSelection={roomSelection}
+                        setRoomSelection={setRoomSelection}
+                        handleRoomSelection={handleRoomSelection}
+                        totalAmount={calculateTotal}
+                    />
                 );
+            case 5:
+                return <Review formData={formData} />;
             default:
                 return null;
         }
-    };
+    }, [currentStep, formData, handleInputChange, errors, branches, roomTypes, roomSelection, handleRoomSelection, calculateTotal]);
 
     return (
-        <div className="min-h-screen bg-gray-50 py-8">
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Header */}
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">
-                        {isCustomer ? 'Customer Onboarding' : 'Onboarding'}
-                    </h1>
-                    <p className="mt-2 text-gray-600">
-                        Complete your profile to get started
-                    </p>
-                </div>
+        <Admin>
+            <section className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
 
-                {/* Progress Steps */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between">
-                        {steps.map((step, index) => (
-                            <div key={step.id} className="flex items-center">
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                                    currentStep >= step.id 
-                                        ? 'bg-indigo-600 border-indigo-600 text-white' 
+            {/* Progress Steps */}
+            <div className="mb-8">
+                <div className="flex items-center justify-between">
+                    {STEP_CONFIG.map((step, index) => (
+                        <div key={step.id} className="flex items-center flex-1 last:flex-none">
+                            <div className="flex flex-col items-center">
+                                <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
+                                    currentStep >= step.id
+                                        ? 'bg-indigo-600 border-indigo-600 text-white'
                                         : 'bg-white border-gray-300 text-gray-500'
                                 }`}>
                                     {currentStep > step.id ? (
-                                        <Icon icon="mdi:check" className="w-5 h-5" />
+                                        <Icon icon="mdi:check" className="w-6 h-6" />
                                     ) : (
-                                        <Icon icon={step.icon} className="w-5 h-5" />
+                                        <Icon icon={step.icon} className="w-6 h-6" />
                                     )}
                                 </div>
-                                <div className="ml-3">
-                                    <p className={`text-sm font-medium ${
-                                        currentStep >= step.id ? 'text-indigo-600' : 'text-gray-500'
-                                    }`}>
-                                        {step.title}
-                                    </p>
-                                </div>
-                                {index < steps.length - 1 && (
-                                    <div className={`w-16 h-0.5 mx-4 ${
-                                        currentStep > step.id ? 'bg-indigo-600' : 'bg-gray-300'
-                                    }`} />
-                                )}
                             </div>
-                        ))}
-                    </div>
-                </div>
-
-                {/* Form Content */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    {renderStepContent()}
-                </div>
-
-                {/* Navigation Buttons */}
-                <div className="mt-6 flex justify-between">
-                    <button
-                        onClick={handlePrevious}
-                        disabled={currentStep === 1}
-                        className={`px-6 py-2 rounded-lg font-medium ${
-                            currentStep === 1
-                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
-                        }`}
-                    >
-                        Previous
-                    </button>
-                    
-                    <div className="flex space-x-3">
-                        {currentStep < steps.length ? (
-                            <button
-                                onClick={handleNext}
-                                className="px-6 py-2 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700"
-                            >
-                                Next
-                            </button>
-                        ) : (
-                            <button
-                                onClick={handleSubmit}
-                                className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700"
-                            >
-                                Complete Onboarding
-                            </button>
-                        )}
-                    </div>
+                            {index < STEP_CONFIG.length - 1 && (
+                                <div className={`flex-1 h-1 mx-2 ${
+                                    currentStep > step.id ? 'bg-indigo-600' : 'bg-gray-300'
+                                }`} />
+                            )}
+                        </div>
+                    ))}
                 </div>
             </div>
-        </div>
+
+            {/* Form Content */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 h-100 overflow-y-auto">
+                {renderStepContent()}
+            </div>
+
+            {/* Navigation Buttons */}
+            <div className="flex justify-between">
+                <button
+                    onClick={currentStep > 1 ? handlePrevious : undefined}
+                    disabled={currentStep === 1}
+                    className={`px-6 py-3 rounded-lg font-medium flex items-center ${
+                        currentStep === 1
+                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
+                    }`}
+                >
+                    <Icon icon="mdi:arrow-left" className="mr-2" />
+                    Previous
+                </button>
+
+                <div>
+                    {currentStep < STEP_CONFIG.length ? (
+                        <button
+                            onClick={handleNext}
+                            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 flex items-center"
+                        >
+                            Next
+                            <Icon icon="mdi:arrow-right" className="ml-2" />
+                        </button>
+                    ) : (
+                        <button
+                            onClick={handleSubmit}
+                            className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center"
+                        >
+                            Complete Onboarding
+                            <Icon icon="mdi:check" className="ml-2" />
+                        </button>
+                    )}
+                </div>
+            </div>
+            </section>
+        </Admin>
     );
 };
 
-export default Onboarding;
+export default CustomerOnboarding;

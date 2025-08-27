@@ -1,8 +1,10 @@
+import Admin from "../../layout/Admin.jsx";
+
 const Profile = () => {
     return (
-        <div>
+        <Admin>
             Profile
-        </div>
+        </Admin>
     )
 }
 

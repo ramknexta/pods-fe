@@ -19,6 +19,7 @@ const Report = lazy(() => import('../pages/report/index.jsx'))
 const History = lazy(() => import('../pages/history/index.jsx'))
 const Management = lazy(() => import('../pages/management/index.jsx'))
 const ManagementRoom = lazy(() => import('../pages/rooms/index.jsx'))
+const Onboarding = lazy(() => import('../pages/onboarding/index.jsx'))
 
 
 const preLoginRoutes = [
@@ -75,6 +76,11 @@ const adminRoutes = [
         path:'/profile',
         title: 'Profile'
     },
+    {
+        component: Onboarding,
+        path: '/onboarding',
+        title: 'Onboarding'
+    }
 ]
 
 const customerRoutes = [

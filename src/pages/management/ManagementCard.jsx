@@ -16,11 +16,7 @@ const ManagementCard = ({ branch, onEdit, onDelete }) => {
             whileHover={{ y: -5 }}
             className="relative bg-white rounded-xl border border-gray-200 p-5 hover:shadow-lg transition-all cursor-pointer overflow-hidden"
             onClick={() =>
-                navigate(
-                    `/management-room?branch_id=${branch.branch_id}&branch_name=${
-                        branch.branch_name || "Branch"
-                    }`
-                )
+                navigate(`/management-room?branch_id=${branch.branch_id}&branch_name=${branch.branch_name || "Branch"}`)
             }
             onMouseEnter={() => setShowDetails(true)}
             onMouseLeave={() => setShowDetails(false)}

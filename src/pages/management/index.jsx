@@ -12,6 +12,7 @@ import ManagementCard from "./ManagementCard.jsx";
 import CustomerCard from "./CustomerCard.jsx";
 import { handleTitleChange } from "../../store/slices/auth/authSlice.js"
 import BranchModal from "./BranchModel.jsx";
+import {useNavigate} from "react-router-dom";
 
 const Management = () => {
     const dispatch = useDispatch();
@@ -25,6 +26,8 @@ const Management = () => {
     const [isEditMode, setIsEditMode] = useState(false);
     const [editingBranch, setEditingBranch] = useState(null);
     const [formErrors, setFormErrors] = useState({});
+
+    const navigate = useNavigate();
 
     const { branches = [], companies = [] } = data || {};
 
@@ -293,6 +296,17 @@ const Management = () => {
                                 View all companies associated with your branches
                             </p>
                         </div>
+                        <motion.button
+                            whileHover={{ scale: 1.02 }}
+                            whileTap={{ scale: 0.98 }}
+                            onClick={() => navigate("/onboarding")}
+                            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all flex items-center font-medium"
+                        >
+                            <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                             Company
+                        </motion.button>
                     </motion.div>
 
                     {companies.length === 0 ? (

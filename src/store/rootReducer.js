@@ -3,6 +3,7 @@ import {authApi} from "./slices/auth/authApi.js";
 import storage from "redux-persist/lib/storage"
 import {persistReducer} from "redux-persist";
 import authSlice from "./slices/auth/authSlice.js";
+import {managementApi} from "./slices/management/managementApi.jsx";
 
 const authPersistConfig = {
     key: "auth",
@@ -13,4 +14,5 @@ const authPersistConfig = {
 export const rootReducer = combineReducers({
     auth: persistReducer(authPersistConfig, authSlice),
     [authApi.reducerPath]: authApi.reducer,
+    [managementApi.reducerPath]: managementApi.reducer,
 })

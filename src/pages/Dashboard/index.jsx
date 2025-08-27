@@ -1,70 +1,115 @@
 import Admin from "../../layout/Admin.jsx";
 import { Icon } from "@iconify/react";
-import { useState } from "react";
-import BranchesCarousel from "../../components/BranchesCarousel.jsx";
-import CustomersCarousel from "../../components/CustomersCarousel.jsx";
+import {useState} from "react";
+import {useFetchDashboardDataQuery} from "../../store/slices/management/managementApi.jsx";
+import ManagementCard from "../management/ManagementCard.jsx";
+import {useNavigate} from "react-router-dom";
+
+const stats = [
+    {
+        label: "Total Pods",
+        value: 6,
+        icon: <Icon icon='mdi:office-building' className="w-6 h-6 text-purple-500" />,
+        change: "+2 since last week",
+        trend: "up"
+    },
+    {
+        label: "Available",
+        value: 3,
+        icon: <Icon icon='mdi:check-circle' className="w-6 h-6 text-green-500" />,
+        change: "-1 since yesterday",
+        trend: "down"
+    },
+    {
+        label: "Booked",
+        value: 1,
+        icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-blue-500" />,
+        change: "No change",
+        trend: "neutral"
+    },
+    {
+        label: "Maintenance",
+        value: 2,
+        icon: <Icon icon='mdi:tools' className="w-6 h-6 text-red-500" />,
+        change: "+1 since yesterday",
+        trend: "up"
+    },
+];
+
+const bookings = [
+    { id: "BK001", customer: "John Smith", email: "johnsmith@example.com", pod: "Focus Pod", date: "Aug 5, 2024 09:00 AM", duration: "2h", status: "Confirmed", payment: "Paid ₹500" },
+    { id: "BK002", customer: "Emma Johnson", email: "emmaj@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 11:30 AM", duration: "1:30h", status: "Pending", payment: "Pending ₹480" },
+    { id: "BK003", customer: "Michael Brown", email: "mbrown@example.com", pod: "Meeting Room Beta", date: "Aug 5, 2024 02:30 PM", duration: "2h", status: "Cancelled", payment: "Failed ₹120" },
+    { id: "BK004", customer: "Sarah Williams", email: "sarahw@example.com", pod: "Creative Studio", date: "Aug 5, 2024 11:00 AM", duration: "1:30h", status: "Confirmed", payment: "Paid ₹600" },
+    { id: "BK005", customer: "David Miller", email: "davidm@example.com", pod: "Quiet Zone Delta", date: "Aug 5, 2024 01:00 PM", duration: "1h", status: "Confirmed", payment: "Paid ₹315" },
+    { id: "BK006", customer: "Lisa Anderson", email: "lisa@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 07:00 AM", duration: "2h", status: "Pending", payment: "Pending ₹250" },
+];
+
+const statusConfig = {
+    Confirmed: { color: "bg-green-100 text-green-800", icon: "mdi:check-circle" },
+    Pending: { color: "bg-yellow-100 text-yellow-800", icon: "mdi:clock-time-three" },
+    Cancelled: { color: "bg-red-100 text-red-800", icon: "mdi:close-circle" },
+};
+
+const paymentConfig = {
+    Paid: { color: "bg-green-100 text-green-800", text: "Paid" },
+    Pending: { color: "bg-yellow-100 text-yellow-800", text: "Pending" },
+    Failed: { color: "bg-red-100 text-red-800", text: "Failed" },
+};
 
 const Dashboard = () => {
-    const stats = [
+    const [currentPage, setCurrentPage] = useState(1);
+    const { data, error, isLoading } = useFetchDashboardDataQuery();
+    const [showManagementList, setShowManagementList] = useState(false);
+
+    const navigate = useNavigate();
+
+
+    if (isLoading) return <div>Loading...</div>;
+
+    if (!data) return <div>No data available</div>;
+
+    const {
+        total_managements,
+        total_branches,
+        total_rooms,
+        total_capacity,
+        total_customers,
+        branches,
+        companies,
+    } = data;
+
+    const mgmtStats = [
         {
             label: "Total Branches",
-            value: 8,
+            value: total_branches,
             icon: <Icon icon='mdi:office-building' className="w-6 h-6 text-purple-500" />,
             change: "+2 since last week",
             trend: "up"
         },
         {
-            label: "Total Pods",
-            value: 24,
-            icon: <Icon icon='mdi:view-grid' className="w-6 h-6 text-blue-500" />,
-            change: "+6 since last week",
-            trend: "up"
-        },
-        {
-            label: "Available",
-            value: 12,
+            label: "Total Rooms",
+            value: total_rooms,
             icon: <Icon icon='mdi:check-circle' className="w-6 h-6 text-green-500" />,
             change: "-1 since yesterday",
             trend: "down"
         },
         {
-            label: "Booked",
-            value: 8,
-            icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-orange-500" />,
-            change: "+2 since yesterday",
-            trend: "up"
+            label: "Capacity",
+            value: total_capacity,
+            icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-blue-500" />,
+            change: "No change",
+            trend: "neutral"
         },
         {
-            label: "Maintenance",
-            value: 4,
+            label: "Customers",
+            value: total_customers,
             icon: <Icon icon='mdi:tools' className="w-6 h-6 text-red-500" />,
             change: "+1 since yesterday",
             trend: "up"
         },
     ];
 
-    const bookings = [
-        { id: "BK001", customer: "John Smith", email: "johnsmith@example.com", pod: "Focus Pod", date: "Aug 5, 2024 09:00 AM", duration: "2h", status: "Confirmed", payment: "Paid ₹500" },
-        { id: "BK002", customer: "Emma Johnson", email: "emmaj@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 11:30 AM", duration: "1:30h", status: "Pending", payment: "Pending ₹480" },
-        { id: "BK003", customer: "Michael Brown", email: "mbrown@example.com", pod: "Meeting Room Beta", date: "Aug 5, 2024 02:30 PM", duration: "2h", status: "Cancelled", payment: "Failed ₹120" },
-        { id: "BK004", customer: "Sarah Williams", email: "sarahw@example.com", pod: "Creative Studio", date: "Aug 5, 2024 11:00 AM", duration: "1:30h", status: "Confirmed", payment: "Paid ₹600" },
-        { id: "BK005", customer: "David Miller", email: "davidm@example.com", pod: "Quiet Zone Delta", date: "Aug 5, 2024 01:00 PM", duration: "1h", status: "Confirmed", payment: "Paid ₹315" },
-        { id: "BK006", customer: "Lisa Anderson", email: "lisa@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 07:00 AM", duration: "2h", status: "Pending", payment: "Pending ₹250" },
-    ];
-
-    const statusConfig = {
-        Confirmed: { color: "bg-green-100 text-green-800", icon: "mdi:check-circle" },
-        Pending: { color: "bg-yellow-100 text-yellow-800", icon: "mdi:clock-time-three" },
-        Cancelled: { color: "bg-red-100 text-red-800", icon: "mdi:close-circle" },
-    };
-
-    const paymentConfig = {
-        Paid: { color: "bg-green-100 text-green-800", text: "Paid" },
-        Pending: { color: "bg-yellow-100 text-yellow-800", text: "Pending" },
-        Failed: { color: "bg-red-100 text-red-800", text: "Failed" },
-    };
-
-    const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 5;
     const totalPages = Math.ceil(bookings.length / itemsPerPage);
 
@@ -76,6 +121,12 @@ const Dashboard = () => {
     const handlePageChange = (page) => {
         if (page >= 1 && page <= totalPages) {
             setCurrentPage(page);
+        }
+    };
+
+    const handleStatClick = (stat) => {
+        if (stat.label === "Total Branches") {
+            navigate("/management")
         }
     };
 
@@ -98,27 +149,47 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5">
-                    {stats.map((stat, i) => (
+                {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">*/}
+                {/*    {stats.map((stat, i) => (*/}
+                {/*        <div*/}
+                {/*            key={i}*/}
+                {/*            className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"*/}
+                {/*        >*/}
+                {/*            <div className="flex justify-between items-start">*/}
+                {/*                <div>*/}
+                {/*                    <p className="text-sm font-medium text-gray-500 mb-1">{stat.label}</p>*/}
+                {/*                    <h3 className="text-2xl font-bold text-gray-800">{stat.value}</h3>*/}
+                {/*                    <p className={`text-xs mt-2 flex items-center ${*/}
+                {/*                        stat.trend === "up" ? "text-red-500" :*/}
+                {/*                            stat.trend === "down" ? "text-green-500" : "text-gray-500"*/}
+                {/*                    }`}>*/}
+                {/*                        {stat.trend === "up" ? (*/}
+                {/*                            <Icon icon="mdi:arrow-up" className="mr-1" />*/}
+                {/*                        ) : stat.trend === "down" ? (*/}
+                {/*                            <Icon icon="mdi:arrow-down" className="mr-1" />*/}
+                {/*                        ) : null}*/}
+                {/*                        {stat.change}*/}
+                {/*                    </p>*/}
+                {/*                </div>*/}
+                {/*                <div className="bg-gray-100 p-3 rounded-lg">*/}
+                {/*                    {stat.icon}*/}
+                {/*                </div>*/}
+                {/*            </div>*/}
+                {/*        </div>*/}
+                {/*    ))}*/}
+                {/*</div>*/}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {mgmtStats.map((stat, i) => (
                         <div
                             key={i}
                             className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"
+                            onClick={() => handleStatClick(stat)}
                         >
                             <div className="flex justify-between items-start">
                                 <div>
                                     <p className="text-sm font-medium text-gray-500 mb-1">{stat.label}</p>
                                     <h3 className="text-2xl font-bold text-gray-800">{stat.value}</h3>
-                                    <p className={`text-xs mt-2 flex items-center ${
-                                        stat.trend === "up" ? "text-red-500" :
-                                            stat.trend === "down" ? "text-green-500" : "text-gray-500"
-                                    }`}>
-                                        {stat.trend === "up" ? (
-                                            <Icon icon="mdi:arrow-up" className="mr-1" />
-                                        ) : stat.trend === "down" ? (
-                                            <Icon icon="mdi:arrow-down" className="mr-1" />
-                                        ) : null}
-                                        {stat.change}
-                                    </p>
                                 </div>
                                 <div className="bg-gray-100 p-3 rounded-lg">
                                     {stat.icon}
@@ -127,12 +198,6 @@ const Dashboard = () => {
                         </div>
                     ))}
                 </div>
-
-                {/* Branches Carousel Section */}
-                <BranchesCarousel />
-
-                {/* Customers Carousel Section */}
-                <CustomersCarousel />
 
                 {/* Table Section */}
                 <div className="max-h-96 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">

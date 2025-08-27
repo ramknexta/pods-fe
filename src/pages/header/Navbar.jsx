@@ -4,8 +4,6 @@ import {useSelector} from "react-redux";
 const Navbar = () => {
     const {title} = useSelector((state) => state.auth);
 
-    console.log(title)
-
     return (
         <nav className='relative w-full z-50'>
             <div className='fixed w-full p-5 pl-30'>

@@ -9,13 +9,15 @@ const Navbar = () => {
 
     const handleLogout = async () => {
         await persistor.purge()
-        navigate('/login')
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.reload();
     }
 
     return (
         <nav className='relative w-full z-50'>
             <div className='fixed w-full p-5 pl-30'>
-                <div className='flex items-center justify-between px-5 h-20 border border-mild-black rounded-lg'>
+                <div className='flex items-center justify-between bg-white px-5 h-20 border border-mild-black rounded-lg'>
                     <div className="flex items-center space-x-2">
                         <h2 className="text-2xl font-bold text-primary">{title}</h2>
                     </div>

@@ -1,13 +1,15 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import { Icon } from '@iconify/react';
-import Admin from "../../layout/Admin.jsx";
-import {useFetchDashboardDataQuery, useFetchRoomByBranchIdQuery} from "../../store/slices/management/managementApi.jsx";
-import {useOnboardCustomerMutation} from "../../store/slices/onboard/onboardApi.js";
+import Admin from "../../../layout/Admin.jsx";
+import {useFetchDashboardDataQuery, useFetchRoomByBranchIdQuery} from "../../../store/slices/management/managementApi.jsx";
+import {useOnboardCustomerMutation} from "../../../store/slices/onboard/onboardApi.js";
 import Contact from "./Contact.jsx";
 import BusinessDetails from "./BusinessDetails.jsx";
 import RoomBooking from "./RoomBooking.jsx";
 import Review from "./Review.jsx";
 import Company from "./Company.jsx";
+import {useDispatch} from "react-redux";
+import {handleTitleChange} from "../../../store/slices/auth/authSlice.js";
 
 const STEP_CONFIG = [
     { id: 1, title: 'Company Info', icon: 'mdi:office-building' },
@@ -63,13 +65,20 @@ const CustomerOnboarding = () => {
 
     const [errors, setErrors] = useState({});
     const [roomSelection, setRoomSelection] = useState({
+        room_type: 'all',
         booking_type: 'monthly',
         start_date: '',
         end_date: '',
         rooms: []
     });
 
-    const [onboardCustomer, { isLoading: isSubmitting }] = useOnboardCustomerMutation();
+    const dispatch = useDispatch();
+
+    useEffect(() => {
+        dispatch(handleTitleChange("Onboard Customer"));
+    },[])
+
+    const [onboardCustomer, { isLoading: isSubmitting }, refetch] = useOnboardCustomerMutation();
     const { data: managementData } = useFetchDashboardDataQuery();
 
     const { branches = [] } = managementData || {};
@@ -117,10 +126,42 @@ const CustomerOnboarding = () => {
 
     const handleInputChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData(prev => ({
-            ...prev,
-            [name]: type === 'checkbox' ? checked : value
-        }));
+
+        if (name.includes('.')) {
+            const [parent, child] = name.split('.');
+
+            setFormData(prev => {
+                const updatedFormData = {
+                    ...prev,
+                    [parent]: {
+                        ...prev[parent],
+                        [child]: type === 'checkbox' ? checked : value
+                    }
+                };
+
+                // Auto-calculate frequency when days or remainder changes in before/after
+                if (parent === 'before' && (child === 'days' || child === 'remainder')) {
+                    const period = updatedFormData[parent];
+                    const days = parseInt(period.days) || 0;
+                    const remainder = parseInt(period.remainder) || 1;
+
+                    if (remainder > 0) {
+                        const frequency = Math.floor(days / remainder);
+                        updatedFormData[parent] = {
+                            ...period,
+                            frequency: frequency > 0 ? frequency : 0
+                        };
+                    }
+                }
+
+                return updatedFormData;
+            });
+        } else {
+            setFormData(prev => ({
+                ...prev,
+                [name]: type === 'checkbox' ? checked : value
+            }));
+        }
 
         // Clear error when user starts typing
         if (errors[name]) {
@@ -184,23 +225,21 @@ const CustomerOnboarding = () => {
     }, [roomSelection, roomTypes]);
 
     const handleNext = useCallback(() => {
-        // if (validateStep(currentStep)) {
-        //     if (currentStep === 4) {
-        //         // Prepare room booking data for submission
-        //         setFormData(prev => ({
-        //             ...prev,
-        //             room_booking: {
-        //                 booking_type: roomSelection.booking_type,
-        //                 start_date: roomSelection.start_date,
-        //                 end_date: roomSelection.end_date,
-        //                 total_amount: calculateTotal,
-        //                 rooms: roomSelection.rooms
-        //             }
-        //         }));
-        //     }
-        //     setCurrentStep(currentStep + 1);
-        // }
-        setCurrentStep(currentStep + 1);
+        if (validateStep(currentStep)) {
+            if (currentStep === 4) {
+                setFormData(prev => ({
+                    ...prev,
+                    room_booking: {
+                        booking_type: roomSelection.booking_type,
+                        start_date: roomSelection.start_date,
+                        end_date: roomSelection.end_date,
+                        total_amount: calculateTotal,
+                        rooms: roomSelection.rooms
+                    }
+                }));
+            }
+            setCurrentStep(currentStep + 1);
+        }
     },[currentStep, formData, roomSelection, calculateTotal]);
 
     const handlePrevious = useCallback(() => {
@@ -211,9 +250,57 @@ const CustomerOnboarding = () => {
 
     const handleSubmit = useCallback(async () => {
         try {
+
+            const rulePayload = {
+                rule: {
+                    description: formData.description,
+                    event_name:"xDaysFromInvoiceDueDate",
+                    event_data: {
+                        before: {
+                            days: formData.before.days || 0,
+                            remainder: formData.before.remainder || 0,
+                            frequency: formData.before.frequency || 0,
+                            description: `${formData.before.days || 0 } days, ${formData.before.frequency || 0} frequency and ${formData.before.remainder || 0} remainder`,
+                        },
+                        after: {
+                            days: formData.after.days || 0,
+                            remainder: formData.after.remainder || 0,
+                            frequency: formData.after.frequency || 0,
+                            description: `${formData.after.days || 0} days, ${formData.after.frequency || 0} frequency and ${formData.after.remainder || 0} remainder`,
+                        },
+                    },
+                    workflow_id: 0,
+                },
+                actions: [
+                    {
+                        action_type: "email",
+                        action_data: {
+                            to: "Primary Contact",
+                            before_template_id: [1, 1, 1],
+                            after_template_id:  [1, 1, 1],
+                        },
+                    },
+                    {
+                        action_type: "whatsapp",
+                        action_data: {
+                            to: "Primary Contact",
+                            before_template_id: [1, 1, 1],
+                            after_template_id:  [1, 1, 1],
+                        },
+                    }
+                ]
+            }
+
+            const { after, before, description, ...rest } = formData;
+
+            const customerPayload = {
+                ...rest,
+                mgmt_id: branches[0]?.mgmt_id || ''
+            }
+
             const payload = {
-                customer: [{...formData, mgmt_id: branches[0]?.mgmt_id || ''}],
-                rule: false,
+                customer: [customerPayload],
+                rule: rulePayload,
                 invoice: false
             };
 
@@ -323,7 +410,9 @@ const CustomerOnboarding = () => {
                             onClick={handleSubmit}
                             className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center"
                         >
-                            Complete Onboarding
+                            {
+                                isSubmitting ? "Submitting..." : "Complete Onboarding"
+                            }
                             <Icon icon="mdi:check" className="ml-2" />
                         </button>
                     )}

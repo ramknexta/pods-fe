@@ -1,8 +1,10 @@
 import {Icon} from "@iconify/react";
+import {useNavigate} from "react-router-dom";
 
 const CustomerCard = ({ customer }) => {
+    const navigate = useNavigate();
     return (
-        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer">
+        <div className="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/customer-details?customer_id=${customer?.id}`)}>
             <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center">
                     <Icon icon="mdi:business" className="w-6 h-6 text-red-500 mr-2" />

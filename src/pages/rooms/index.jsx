@@ -143,8 +143,8 @@ const Rooms = () => {
 
     const Modal = ({ isOpen, onClose, title, children, actionButton }) => (
         isOpen && (
-            <div className="fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 p-4">
-                <div className="bg-white rounded-xl shadow-xl w-full max-w-md overflow-hidden">
+            <div className="max-w-6xl mx-auto fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-xl w-full overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                         <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
                         <button
@@ -386,7 +386,7 @@ const Rooms = () => {
                         </button>
                     }
                 >
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <InputField
                             label="Room Name"
                             value={roomForm.room_name}
@@ -486,7 +486,7 @@ const Rooms = () => {
                         </button>
                     }
                 >
-                    <div className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <InputField
                             label="Room Name"
                             value={roomForm.room_name}

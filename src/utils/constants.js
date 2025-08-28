@@ -1,6 +1,7 @@
 export const user = {
     ADMIN: 'super-admin',
-    CUSTOMER: 'customer'
+    CUSTOMER: 'customer',
+    RT: 'rt-admin',
 }
 
 export const POD_STATUS = {

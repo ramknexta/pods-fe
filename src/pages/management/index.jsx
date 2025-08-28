@@ -211,7 +211,7 @@ const Management = () => {
 
     return (
         <Admin>
-            <div className="p-6 mb-8">
+            <div className="p-6 mb-8 overflow-y-auto h-full">
                 {/* Branch Section */}
                 <section className="mb-10">
                     <motion.div
@@ -299,7 +299,7 @@ const Management = () => {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            onClick={() => navigate("/onboarding")}
+                            onClick={() => navigate("/customer-onboarding")}
                             className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all flex items-center font-medium"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">

@@ -1,21 +1,17 @@
+import {useMemo} from "react";
 
 const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSelection}) => {
 
     const calculateTotal = () => {
         let total = 0;
 
-        // Loop through each selected room
         roomSelection.rooms.forEach(room => {
-            // Find the room details from roomTypes
             const roomDetails = roomTypes.find(r => r.id === room.room_id);
 
             if (roomDetails) {
-                // Get the appropriate rate based on booking type
                 const rate = roomSelection.booking_type === 'monthly'
                     ? parseFloat(roomDetails.monthly_cost)
                     : parseFloat(roomDetails.hourly_cost);
-
-                // Add to total (rate × quantity)
                 total += rate * room.quantity_booked;
             }
         });
@@ -23,8 +19,15 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
         return total;
     };
 
+    const filterRoomTypes = useMemo(() => {
+        if (roomSelection.room_type === 'all') {
+            return roomTypes;
+        }
+        return roomTypes.filter(room => room.room_type === roomSelection.room_type);
+    }, [roomTypes, roomSelection.room_type]);
+
     return (
-        <div className="max-w-4xl mx-auto p-6 bg-white rounded-lg shadow-sm">
+        <div>
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Workspace Reservation</h2>
                 <p className="text-gray-600">Select and customize your workspace options</p>
@@ -58,28 +61,30 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                         />
                     </div>
 
+                    {roomSelection.booking_type !== 'monthly' && (
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
+                            <input
+                                type="date"
+                                value={roomSelection.end_date}
+                                onChange={(e) => setRoomSelection(prev => ({ ...prev, end_date: e.target.value }))}
+                                min={roomSelection.start_date || new Date().toISOString().split('T')[0]}
+                                className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            />
+                        </div>
+                    )}
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
-                        <input
-                            type="date"
-                            value={roomSelection.end_date}
-                            onChange={(e) => setRoomSelection(prev => ({ ...prev, end_date: e.target.value }))}
-                            min={roomSelection.start_date || new Date().toISOString().split('T')[0]}
+                        <label className="block text-sm font-medium text-gray-700 mb-2">Meeting Type</label>
+                        <select
+                            value={roomSelection.room_type}
+                            onChange={(e) => setRoomSelection(prev => ({ ...prev, room_type: e.target.value }))}
                             className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
-                        />
+                        >
+                            <option value="all">All</option>
+                            <option value="seater">Seater</option>
+                            <option value="meeting">Meeting</option>
+                        </select>
                     </div>
-                    {/*{roomSelection.booking_type === 'monthly' && (*/}
-                    {/*    <div>*/}
-                    {/*        <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>*/}
-                    {/*        <input*/}
-                    {/*            type="date"*/}
-                    {/*            value={roomSelection.end_date}*/}
-                    {/*            onChange={(e) => setRoomSelection(prev => ({ ...prev, end_date: e.target.value }))}*/}
-                    {/*            min={roomSelection.start_date || new Date().toISOString().split('T')[0]}*/}
-                    {/*            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"*/}
-                    {/*        />*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
                 </div>
             </div>
 
@@ -93,7 +98,7 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {roomTypes.map(room => {
+                    {filterRoomTypes.map(room => {
                         const isSelected = roomSelection.rooms.find(r => r.room_id === room.id);
                         const quantityBooked = isSelected ? isSelected.quantity_booked : 0;
 
@@ -137,7 +142,7 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                                     </div>
 
                                     <div className="ml-4 flex flex-col items-end">
-                                        {room.allocation_type === 'seater' ? (
+                                        {room.room_type === 'seater' ? (
                                             <select
                                                 value={quantityBooked}
                                                 onChange={(e) => handleRoomSelection(room.id, parseInt(e.target.value))}

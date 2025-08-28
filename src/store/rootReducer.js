@@ -5,11 +5,13 @@ import {persistReducer} from "redux-persist";
 import authSlice from "./slices/auth/authSlice.js";
 import {managementApi} from "./slices/management/managementApi.jsx";
 import {onboardApi} from "./slices/onboard/onboardApi.js";
+import {customerApi} from "./slices/customer/customerApi.js";
+import {allocationApi} from "./slices/management/allocationApi.js";
 
 const authPersistConfig = {
     key: "auth",
     storage,
-    whitelist: ["user", "token", "role"]
+    whitelist: ["user", "token", "role", "mgmt_id"]
 }
 
 export const rootReducer = combineReducers({
@@ -17,4 +19,6 @@ export const rootReducer = combineReducers({
     [authApi.reducerPath]: authApi.reducer,
     [managementApi.reducerPath]: managementApi.reducer,
     [onboardApi.reducerPath]: onboardApi.reducer,
+    [customerApi.reducerPath]: customerApi.reducer,
+    [allocationApi.reducerPath]: allocationApi.reducer,
 })

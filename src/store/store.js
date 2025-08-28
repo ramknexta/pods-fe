@@ -4,6 +4,8 @@ import {authApi} from "./slices/auth/authApi.js";
 import {persistStore} from "redux-persist";
 import {managementApi} from "./slices/management/managementApi.jsx";
 import {onboardApi} from "./slices/onboard/onboardApi.js";
+import {customerApi} from "./slices/customer/customerApi.js";
+import {allocationApi} from "./slices/management/allocationApi.js";
 
 const store = configureStore({
     reducer: rootReducer,
@@ -14,6 +16,8 @@ const store = configureStore({
             authApi.middleware,
             managementApi.middleware,
             onboardApi.middleware,
+            customerApi.middleware,
+            allocationApi.middleware,
         ),
 })
 

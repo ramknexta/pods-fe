@@ -19,13 +19,23 @@ const Report = lazy(() => import('../pages/report/index.jsx'))
 const History = lazy(() => import('../pages/history/index.jsx'))
 const Management = lazy(() => import('../pages/management/index.jsx'))
 const ManagementRoom = lazy(() => import('../pages/rooms/index.jsx'))
-const Onboarding = lazy(() => import('../pages/onboarding/index.jsx'))
-
+const CustomerOnboarding = lazy(() => import('../pages/onboarding/customer/index.jsx'))
+const ManagementOnboarding = lazy(() => import('../pages/onboarding/management/index.jsx'))
+const CustomerDetails = lazy(() => import('../pages/customer/Details.jsx'))
+const RoomAllocation = lazy(() => import('../pages/rooms/Allocation.jsx'))
 
 const preLoginRoutes = [
     {
         component: Login,
         path:'/login',
+        title: 'Login'
+    }
+]
+
+const rtRoutes = [
+    {
+        component: ManagementOnboarding,
+        path:'/management-onboarding',
         title: 'Login'
     }
 ]
@@ -45,6 +55,11 @@ const adminRoutes = [
         component: ManagementRoom,
         path:'/management-room',
         title: 'Room'
+    },
+    {
+        component: CustomerDetails,
+        path:'/customer-details',
+        title: 'Customer Details'
     },
     {
         component: Pod,
@@ -77,9 +92,14 @@ const adminRoutes = [
         title: 'Profile'
     },
     {
-        component: Onboarding,
-        path: '/onboarding',
+        component: CustomerOnboarding,
+        path: '/customer-onboarding',
         title: 'Onboarding'
+    },
+    {
+        component: RoomAllocation,
+        path: '/allocation',
+        title: 'Room Allocation'
     }
 ]
 
@@ -114,6 +134,8 @@ export const AppRoutes = () => {
         routes = adminRoutes;
     } else if (isAuthenticated && user.CUSTOMER === role) {
         routes = customerRoutes;
+    } else if (isAuthenticated && user.RT === role) {
+        routes = rtRoutes;
     }
 
     return (

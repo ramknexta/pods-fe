@@ -47,8 +47,8 @@ const Login = () => {
 
         if (!credentials.password) {
             newErrors.password = 'Password is required';
-        } else if (credentials.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters';
+        } else if (credentials.password.length < 6) {
+            newErrors.password = 'Password must be at least 6 characters';
         }
 
         setErrors(newErrors);
@@ -73,6 +73,7 @@ const Login = () => {
                 token: result.token,
                 user: result.full_name,
                 role: result.role,
+                mgmt_id: result.mgmt_id,
             }))
 
             // Simulate API call

@@ -77,7 +77,7 @@ const Sidebar = () => {
 
     return (
         <div className='fixed w-20 h-full p-5 z-50'>
-            <div className='h-full w-20 border border-mild-black rounded-lg flex flex-col items-center'>
+            <div className='h-full w-20 border border-mild-black rounded-lg flex flex-col items-center bg-white'>
                 <img src={Logo} alt="Logo" height={28} width={28} className='mt-5' />
                 <div className='flex flex-col gap-5 items-center justify-center h-3/4 w-full'>
                     {

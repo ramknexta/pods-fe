@@ -59,8 +59,7 @@ const paymentConfig = {
 
 const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data, error, isLoading } = useFetchDashboardDataQuery();
-    const [showManagementList, setShowManagementList] = useState(false);
+    const { data, isLoading } = useFetchDashboardDataQuery();
 
     const navigate = useNavigate();
 
@@ -70,13 +69,10 @@ const Dashboard = () => {
     if (!data) return <div>No data available</div>;
 
     const {
-        total_managements,
         total_branches,
         total_rooms,
         total_capacity,
         total_customers,
-        branches,
-        companies,
     } = data;
 
     const mgmtStats = [

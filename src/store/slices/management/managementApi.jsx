@@ -14,6 +14,13 @@ export const managementApi = createApi({
         },
     }),
     endpoints: (builder) => ({
+        addManagement: builder.mutation({
+            query: (data) => ({
+                url: "/management/add",
+                method: "POST",
+                body: data,
+            }),
+        }),
         fetchManagement: builder.query({
             query: () => ({ url: "/management/all", method: "GET" }),
         }),
@@ -172,6 +179,7 @@ export const managementApi = createApi({
 });
 
 export const {
+    useAddManagementMutation,
     useFetchManagementQuery,
     useFetchBranchByMgmtIdQuery,
     useFetchAvailableRoomsQuery,

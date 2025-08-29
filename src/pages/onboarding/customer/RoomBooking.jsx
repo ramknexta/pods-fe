@@ -30,11 +30,10 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
         <div>
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Workspace Reservation</h2>
-                <p className="text-gray-600">Select and customize your workspace options</p>
             </div>
 
             {/* Booking Configuration Section */}
-            <div className="bg-gray-50 p-6 rounded-lg mb-8">
+            <div className=" p-6 rounded-lg mb-8">
                 <h3 className="text-lg font-semibold text-gray-800 mb-4">Booking Configuration</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -93,8 +92,8 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                 <div className="flex justify-between items-center mb-4">
                     <h3 className="text-lg font-semibold text-gray-800">Available Workspaces</h3>
                     <span className="text-sm text-gray-500">
-                                    {roomTypes.length} option{roomTypes.length !== 1 ? 's' : ''} available
-                                  </span>
+                        {roomTypes.length} option{roomTypes.length !== 1 ? 's' : ''} available
+                      </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -187,7 +186,7 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
 
             {/* Booking Summary */}
             {roomSelection.rooms.filter(room => room.quantity_booked > 0).length > 0 && (
-                <div className="mt-8 p-6 bg-gray-50 rounded-lg border border-gray-200">
+                <div className="mt-8 p-6  rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Booking Summary</h3>
 
                     <div className="space-y-3 mb-4">

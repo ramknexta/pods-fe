@@ -1,30 +1,32 @@
-import { motion } from "framer-motion";
+import {AnimatePresence, motion} from "framer-motion";
 
-export default function Spinner({ color = "bg-tertiary", size = 8 }) {
-    const bars = [0, 1, 2, 3, 4];
+const Spinner = () => {
 
     return (
-        <div className="flex items-center justify-center space-x-1">
-            {bars.map((bar) => (
-                <motion.span
-                    key={bar}
-                    className={`${color} rounded-full`}
-                    style={{
-                        width: size /2 ,
-                        height: size * 2,
-                    }}
-                    animate={{
-                        scaleY: [1, 1.5, 1],
-                        opacity: [0.5, 1, 0.5],
-                    }}
-                    transition={{
-                        duration: 0.6,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                        delay: bar * 0.1,
-                    }}
-                />
-            ))}
-        </div>
+        <AnimatePresence>
+            <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm"
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ type: "spring", damping: 20, stiffness: 300 }}
+                    className="bg-white rounded-xl p-8 flex flex-col items-center shadow-2xl"
+                >
+                    <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                        className="rounded-full h-16 w-16 border-4 border-blue-100 border-t-blue-600 mb-6"
+                    />
+                    <p className="text-gray-700 font-medium">Loading workflows...</p>
+                    <p className="text-sm text-gray-500 mt-1">Please wait while we fetch your data</p>
+                </motion.div>
+            </motion.div>
+        </AnimatePresence>
     );
 }
+
+export default Spinner;

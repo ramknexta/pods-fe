@@ -96,7 +96,6 @@ const RoomAllocation = () => {
         }
     }, [data]);
 
-    console.log(customers)
 
     const showNotification = (message, type = "success") => {
         setNotification({ show: true, message, type });
@@ -107,8 +106,6 @@ const RoomAllocation = () => {
         try {
             const response = await getAvailableRooms({ branchId, customerId }).unwrap();
 
-            console.log(response)
-
             setAvailableRooms(response?.data || []);
         } catch (err) {
             console.error("Error fetching available rooms", err);
@@ -118,7 +115,6 @@ const RoomAllocation = () => {
 
     const handleAllocateRooms = async () => {
         try {
-            console.log(allocationData)
             if (!allocationData.customer_id || !allocationData.branch_id || allocationData.rooms.length === 0) {
                 showNotification("Please fill in all required fields", "error");
                 return;
@@ -133,9 +129,9 @@ const RoomAllocation = () => {
 
             const resp = await allocateRoom(apiData).unwrap();
 
-            console.log(resp)
 
             setAllocationDialog(false);
+            refetch();
             resetAllocationData();
             showNotification("Rooms allocated successfully!");
         } catch (err) {
@@ -207,7 +203,7 @@ const RoomAllocation = () => {
         setAllocationData((prev) => ({
             ...prev,
             customer_id: customer.id,
-            customer_branch_id: customer.branch_id,
+            customer_branch_id: customer.customer_branch_id,
             mgmt_id: parseInt(mgmt_id),
             branch_id: customer.branch_ids,
         }));
@@ -325,7 +321,7 @@ const RoomAllocation = () => {
                                                             <p className="text-sm text-gray-600">
                                                                 {room.room_name}
                                                                 <span className="ml-1 text-xs text-primary">
-                                                                    {room.quantity_booked} x {formatCurrency(customer.total_allocated_amount / room.quantity_booked)}
+                                                                    {room.quantity_booked} x {formatCurrency(room.total_amount / room.quantity_booked)}
                                                                 </span>
                                                             </p>
 

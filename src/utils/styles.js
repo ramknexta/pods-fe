@@ -1,0 +1,1 @@
+export const onboardingInputStyle = "w-full px-4 py-3 border text-[14px] rounded-lg"

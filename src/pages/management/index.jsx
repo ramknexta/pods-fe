@@ -221,7 +221,7 @@ const Management = () => {
                         className="flex justify-between items-center mb-6"
                     >
                         <div>
-                            <h2 className="text-2xl font-semibold text-gray-800">Branches</h2>
+                            <h2 className="text-xl font-semibold text-gray-800">Branches</h2>
                             <p className="text-gray-500 text-sm mt-1">
                                 Manage all your business branches and their details
                             </p>
@@ -230,7 +230,7 @@ const Management = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={openAddModal}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all flex items-center font-medium"
+                            className="px-4 py-2 text-xs bg-secondary text-white rounded-lg shadow-md hover:bg-primary transition-all flex items-center font-medium"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -253,7 +253,7 @@ const Management = () => {
                                 whileHover={{ scale: 1.05 }}
                                 whileTap={{ scale: 0.95 }}
                                 onClick={openAddModal}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                className="px-6 py-2 text-xs bg-secondary text-white rounded-lg hover:bg-primary transition-colors font-medium"
                             >
                                 Add Your First Branch
                             </motion.button>
@@ -291,21 +291,21 @@ const Management = () => {
                         className="flex justify-between items-center mb-6"
                     >
                         <div>
-                            <h2 className="text-2xl font-semibold text-gray-800">Companies</h2>
+                            <h2 className="text-xl font-semibold text-gray-800">Customers</h2>
                             <p className="text-gray-500 text-sm mt-1">
-                                View all companies associated with your branches
+                                View all customers associated with your branches
                             </p>
                         </div>
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={() => navigate("/customer-onboarding")}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-all flex items-center font-medium"
+                            className="px-4 py-2 text-xs bg-secondary text-white rounded-lg shadow-md hover:bg-primary transition-all flex items-center font-medium"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
                             </svg>
-                             Company
+                             Customer
                         </motion.button>
                     </motion.div>
 

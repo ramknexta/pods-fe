@@ -6,6 +6,7 @@ import {managementApi} from "./slices/management/managementApi.jsx";
 import {onboardApi} from "./slices/onboard/onboardApi.js";
 import {customerApi} from "./slices/customer/customerApi.js";
 import {allocationApi} from "./slices/management/allocationApi.js";
+import {workflowApi} from "./slices/workflow/workflowApi.js";
 
 const store = configureStore({
     reducer: rootReducer,
@@ -18,6 +19,7 @@ const store = configureStore({
             onboardApi.middleware,
             customerApi.middleware,
             allocationApi.middleware,
+            workflowApi.middleware,
         ),
 })
 

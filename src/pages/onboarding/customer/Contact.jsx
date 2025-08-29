@@ -1,9 +1,10 @@
+import {onboardingInputStyle} from "../../../utils/styles.js";
+
 const Contact = ({formData, handleInputChange, errors }) => {
     return (
         <>
             <div className="space-y-6">
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">Contact Person</h3>
-                <p className="text-gray-500 mb-6">Primary contact information</p>
+                <h3 className="text-xl font-semibold text-gray-800 mb-6">Contact Person</h3>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
@@ -13,7 +14,7 @@ const Contact = ({formData, handleInputChange, errors }) => {
                             name="first_name"
                             value={formData.first_name}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            className={`${onboardingInputStyle} ${
                                 errors.first_name ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter first name"
@@ -28,7 +29,7 @@ const Contact = ({formData, handleInputChange, errors }) => {
                             name="last_name"
                             value={formData.last_name}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            className={`${onboardingInputStyle} ${
                                 errors.last_name ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter last name"
@@ -43,7 +44,7 @@ const Contact = ({formData, handleInputChange, errors }) => {
                             name="contact_email"
                             value={formData.contact_email}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            className={`${onboardingInputStyle} ${
                                 errors.contact_email ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter contact email"
@@ -58,7 +59,7 @@ const Contact = ({formData, handleInputChange, errors }) => {
                             name="mobile"
                             value={formData.mobile}
                             onChange={handleInputChange}
-                            className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                            className={`${onboardingInputStyle} ${
                                 errors.mobile ? 'border-red-500' : 'border-gray-300'
                             }`}
                             placeholder="Enter mobile number"

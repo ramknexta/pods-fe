@@ -7,6 +7,7 @@ import {managementApi} from "./slices/management/managementApi.jsx";
 import {onboardApi} from "./slices/onboard/onboardApi.js";
 import {customerApi} from "./slices/customer/customerApi.js";
 import {allocationApi} from "./slices/management/allocationApi.js";
+import {workflowApi} from "./slices/workflow/workflowApi.js";
 
 const authPersistConfig = {
     key: "auth",
@@ -21,4 +22,5 @@ export const rootReducer = combineReducers({
     [onboardApi.reducerPath]: onboardApi.reducer,
     [customerApi.reducerPath]: customerApi.reducer,
     [allocationApi.reducerPath]: allocationApi.reducer,
+    [workflowApi.reducerPath]: workflowApi.reducer,
 })

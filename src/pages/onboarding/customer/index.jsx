@@ -10,13 +10,17 @@ import Review from "./Review.jsx";
 import Company from "./Company.jsx";
 import {useDispatch} from "react-redux";
 import {handleTitleChange} from "../../../store/slices/auth/authSlice.js";
+import {useNavigate} from "react-router-dom";
+import WorkflowPreviewModel from "../../workflow/PreviewModel.jsx";
+import EmailTemplateModel from "../../workflow/EmailTemplateModel.jsx";
+import WhatsappTemplateModel from "../../workflow/WhatsappTemplateModel.jsx";
 
 const STEP_CONFIG = [
-    { id: 1, title: 'Company Info', icon: 'mdi:office-building' },
-    { id: 2, title: 'Contact Details', icon: 'mdi:account' },
-    { id: 3, title: 'Business Info', icon: 'mdi:file-document' },
-    { id: 4, title: 'Room Booking', icon: 'mdi:desk' },
-    { id: 5, title: 'Review', icon: 'mdi:check-circle' }
+    { id: 1, title: 'Company Details', desc: 'Basic details about your company', icon: 'mdi:office-building' },
+    { id: 2, title: 'Contact Details', desc: 'Primary contact information', icon: 'mdi:account' },
+    { id: 3, title: 'Business Details', desc: 'Basic details about your company', icon: 'mdi:file-document' },
+    { id: 4, title: 'Room Booking', desc: 'Select and customize your workspace options', icon: 'mdi:desk' },
+    { id: 5, title: 'Review', desc: 'Please review all details before submitting', icon: 'mdi:check-circle' }
 ];
 
 const initialFormData = {
@@ -42,10 +46,14 @@ const initialFormData = {
     pincode: '',
     country: 'India',
     e_invoicing: false,
-    workflow: true,
+    workflow: false,
     is_invoice: false,
     workflow_name: 'default',
     description: '',
+    action: {
+        email: false,
+        whatsapp: false,
+    },
     before: {
         days: 0,
         remainder: 0,
@@ -71,8 +79,20 @@ const CustomerOnboarding = () => {
         end_date: '',
         rooms: []
     });
+    const [defaultModelOpen, setDefaultModelOpen] = useState(false);
+    const [emailModelOpen, setEmailModelOpen] = useState(false);
+    const [whatsappModelOpen, setWhatsappModelOpen] = useState(false);
+    const [emailTemplateId, setEmailTemplateId] = useState({
+        before: [],
+        after: [],
+    });
+    const [whatsappTemplateId, setWhatsappTemplateId] = useState({
+        before: [],
+        after: [],
+    })
 
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     useEffect(() => {
         dispatch(handleTitleChange("Onboard Customer"));
@@ -116,8 +136,20 @@ const CustomerOnboarding = () => {
         }
 
         if (step === 3) {
+            if (!formData.addr1) newErrors.addr1 = 'Address is required';
+            if (!formData.location) newErrors.location = 'Location is required';
+            if (!formData.state) newErrors.state = 'State is required';
+            if (!formData.pincode) newErrors.pincode = 'Pincode is required';
             if (!formData.country) newErrors.country = 'Country is required';
             if (!formData.branch_id) newErrors.branch_id = 'Branch ID is required';
+
+            if (!formData.workflow) {
+                if (!formData.workflow_name) newErrors.workflow_name = 'Workflow name is required';
+                if (!formData.description) newErrors.description = 'Description is required';
+                if (!formData.action.email && !formData.action.whatsapp) newErrors.action = 'At least one action is required';
+                if (!formData.before.days && !formData.before.remainder) newErrors.before = 'At least one before event is required';
+                if (!formData.after.days && !formData.after.remainder) newErrors.after = 'At least one after event is required';
+            }
         }
 
         setErrors(newErrors);
@@ -152,6 +184,11 @@ const CustomerOnboarding = () => {
                             frequency: frequency > 0 ? frequency : 0
                         };
                     }
+                } else if (parent === 'action' && (child === 'email' || child === 'whatsapp')) {
+                    updatedFormData[parent] = {
+                        ...updatedFormData[parent],
+                        [child]: type === 'checkbox' ? checked : value
+                    };
                 }
 
                 return updatedFormData;
@@ -246,7 +283,48 @@ const CustomerOnboarding = () => {
         setCurrentStep(prev => prev - 1);
     }, []);
 
+    const handleBack = () =>  navigate(-1)
 
+
+    const defaultModelhandler = () => {
+        setDefaultModelOpen(!defaultModelOpen)
+    };
+    const emailModelhandler = () => {
+        setEmailModelOpen(!emailModelOpen);
+    }
+    const whatsappModelhandler = () => {
+        setWhatsappModelOpen(!whatsappModelOpen)
+    };
+
+
+
+    const handleEmailTemplateIdChange = (id, type) => {
+        if (type === 'before') {
+            setEmailTemplateId(prev => ({
+                ...prev,
+                before: id
+            }))
+        } else {
+            setEmailTemplateId(prev => ({
+                ...prev,
+                after: id
+            }))
+        }
+    }
+
+    const handleWhatsappTemplateIdChange = (id, type) => {
+        if (type === 'before') {
+            setWhatsappTemplateId(prev => ({
+                ...prev,
+                before: id
+            }))
+        } else {
+            setWhatsappTemplateId(prev => ({
+                ...prev,
+                after: id
+            }))
+        }
+    }
 
     const handleSubmit = useCallback(async () => {
         try {
@@ -291,7 +369,7 @@ const CustomerOnboarding = () => {
                 ]
             }
 
-            const { after, before, description, ...rest } = formData;
+            const { after, before, description, action, ...rest } = formData;
 
             const customerPayload = {
                 ...rest,
@@ -305,7 +383,8 @@ const CustomerOnboarding = () => {
             };
 
             const response = await onboardCustomer(payload).unwrap();
-            console.log('Onboarding successful:', response);
+            refetch()
+            navigate('/dashboard')
         } catch (error) {
             console.error('Onboarding failed:', error);
         }
@@ -325,7 +404,12 @@ const CustomerOnboarding = () => {
             case 2:
                 return <Contact {...stepProps} />;
             case 3:
-                return <BusinessDetails {...stepProps} />;
+                return <BusinessDetails
+                    {...stepProps}
+                    defaultModelhandler={defaultModelhandler}
+                    emailModelhandler={emailModelhandler}
+                    whatsappModelhandler={whatsappModelhandler}
+                    />;
             case 4:
                 return (
                     <RoomBooking
@@ -346,61 +430,77 @@ const CustomerOnboarding = () => {
 
     return (
         <Admin>
-            <section className="max-w-6xl mx-auto p-4 sm:p-6 lg:p-8">
+            <section className={`max-w-5xl mx-auto p-4 sm:p-6 lg:p-8`}>
 
-            {/* Progress Steps */}
-            <div className="mb-8">
-                <div className="flex items-center justify-between">
+            <div className="mb-8 space-y-4">
+                <div className="flex items-center justify-center gap-2">
                     {STEP_CONFIG.map((step, index) => (
-                        <div key={step.id} className="flex items-center flex-1 last:flex-none">
-                            <div className="flex flex-col items-center">
-                                <div className={`flex items-center justify-center w-12 h-12 rounded-full border-2 ${
-                                    currentStep >= step.id
-                                        ? 'bg-indigo-600 border-indigo-600 text-white'
-                                        : 'bg-white border-gray-300 text-gray-500'
-                                }`}>
-                                    {currentStep > step.id ? (
-                                        <Icon icon="mdi:check" className="w-6 h-6" />
-                                    ) : (
-                                        <Icon icon={step.icon} className="w-6 h-6" />
-                                    )}
-                                </div>
-                            </div>
+                        <div key={step.id} className="flex items-center justify-center">
                             {index < STEP_CONFIG.length - 1 && (
-                                <div className={`flex-1 h-1 mx-2 ${
-                                    currentStep > step.id ? 'bg-indigo-600' : 'bg-gray-300'
+                                <div className={`h-1.25 rounded-lg w-20 ${
+                                    currentStep > step.id ? 'bg-secondary w-35' : 'bg-gray-300'
                                 }`} />
                             )}
                         </div>
                     ))}
                 </div>
+                <div className="text-center text-sm text-gray-500">
+                    <h3 className="text-2xl font-semibold text-gray-800 mb-2">{STEP_CONFIG[currentStep-1].title}</h3>
+                    <p className="text-gray-500 mb-6">{STEP_CONFIG[currentStep-1].desc}</p>
+                </div>
             </div>
 
-            {/* Form Content */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 mb-6 h-100 overflow-y-auto">
+            <div className="bg-white rounded-xl shadow-sm p-6 mb-6 max-h-100 overflow-y-auto">
                 {renderStepContent()}
             </div>
 
-            {/* Navigation Buttons */}
-            <div className="flex justify-between">
+            <div>
+                {defaultModelOpen && (
+                    <WorkflowPreviewModel
+                        branch_id={formData.branch_id}
+                        isDefault={formData.workflow}
+                        onClose={defaultModelhandler}
+                    />
+                )}
+                {emailModelOpen && (
+                    <EmailTemplateModel
+                        beforeRemainder={formData.before.remainder}
+                        afterRemainder={formData.after.remainder}
+                        templateId={emailTemplateId}
+                        onTemplateIdChange={handleEmailTemplateIdChange}
+                        onClose={emailModelhandler}
+                    />
+                )}
+                {whatsappModelOpen && (
+                    <WhatsappTemplateModel
+                        beforeRemainder={formData.before.remainder}
+                        afterRemainder={formData.after.remainder}
+                        templateId={whatsappTemplateId}
+                        onTemplateIdChange={handleWhatsappTemplateIdChange}
+                        onClose={whatsappModelhandler}
+                    />
+                )}
+            </div>
+
+
+                <div className="flex justify-between">
                 <button
-                    onClick={currentStep > 1 ? handlePrevious : undefined}
-                    disabled={currentStep === 1}
-                    className={`px-6 py-3 rounded-lg font-medium flex items-center ${
+                    onClick={currentStep > 1 ? handlePrevious : handleBack}
+                    className={`px-6 py-2 rounded-lg font-medium flex items-center cursor-pointer ${
                         currentStep === 1
-                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                            ? 'bg-gray-100 text-primary'
                             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50'
                     }`}
                 >
                     <Icon icon="mdi:arrow-left" className="mr-2" />
-                    Previous
+                    { currentStep === 1?  "Back" : "Previous" }
                 </button>
 
                 <div>
                     {currentStep < STEP_CONFIG.length ? (
                         <button
                             onClick={handleNext}
-                            className="px-6 py-3 bg-indigo-600 text-white rounded-lg font-medium hover:bg-indigo-700 flex items-center"
+                            className="px-6 py-2 bg-secondary text-white rounded-lg font-medium hover:bg-primary cursor-pointer hover: flex items-center"
                         >
                             Next
                             <Icon icon="mdi:arrow-right" className="ml-2" />
@@ -408,10 +508,10 @@ const CustomerOnboarding = () => {
                     ) : (
                         <button
                             onClick={handleSubmit}
-                            className="px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center"
+                            className="px-6 py-2 bg-secondary cursor-pointer text-white rounded-lg font-medium flex items-center"
                         >
                             {
-                                isSubmitting ? "Submitting..." : "Complete Onboarding"
+                                isSubmitting ? "Submitting..." : "Submit"
                             }
                             <Icon icon="mdi:check" className="ml-2" />
                         </button>

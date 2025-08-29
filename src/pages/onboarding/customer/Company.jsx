@@ -1,3 +1,5 @@
+import {onboardingInputStyle} from "../../../utils/styles.js";
+
 const Company = ({formData, handleInputChange, errors}) => {
     const countries = [
         'India', 'United States', 'United Kingdom', 'Australia',
@@ -5,8 +7,7 @@ const Company = ({formData, handleInputChange, errors}) => {
     ];
     return (
         <div className="space-y-6">
-            <h3 className="text-xl font-semibold text-gray-800 mb-2">Company Information</h3>
-            <p className="text-gray-500 mb-6">Basic details about your company</p>
+            <h3 className="text-xl font-semibold text-gray-800 mb-6">Company Information</h3>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -16,7 +17,7 @@ const Company = ({formData, handleInputChange, errors}) => {
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        className={`${onboardingInputStyle} ${
                             errors.name ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter company name"
@@ -31,7 +32,7 @@ const Company = ({formData, handleInputChange, errors}) => {
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        className={`${onboardingInputStyle} ${
                             errors.email ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder="Enter company email"
@@ -45,7 +46,7 @@ const Company = ({formData, handleInputChange, errors}) => {
                         name="country"
                         value={formData.country}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        className={`${onboardingInputStyle} ${
                             errors.country ? 'border-red-500' : 'border-gray-300'
                         }`}
                     >
@@ -68,7 +69,7 @@ const Company = ({formData, handleInputChange, errors}) => {
                         name="gstin"
                         value={formData.gstin}
                         onChange={handleInputChange}
-                        className={`w-full px-4 py-3 border rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 ${
+                        className={`${onboardingInputStyle} ${
                             errors.gstin ? 'border-red-500' : 'border-gray-300'
                         }`}
                         placeholder={

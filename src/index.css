@@ -8,8 +8,9 @@
   --font-poppins: "Poppins", monospace;
   --font-montserrat: "Montserrat", sans-serif;
   --font-roboto: "Roboto", sans-serif;
-  --bg-primary: #FFFFFF;
+  --color-base: #FFFFFF;
   --color-primary: #000000;
+  --color-secondary: #263238;
   --color-btn: #1B73E8;
   --color-mild-black: #0000001A;
 }

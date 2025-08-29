@@ -5,7 +5,6 @@ import {useNavigate} from "react-router-dom";
 
 const Navbar = () => {
     const {title} = useSelector((state) => state.auth);
-    const navigate = useNavigate();
 
     const handleLogout = async () => {
         await persistor.purge()
@@ -16,10 +15,10 @@ const Navbar = () => {
 
     return (
         <nav className='relative w-full z-50'>
-            <div className='fixed w-full p-5 pl-30'>
-                <div className='flex items-center justify-between bg-white px-5 h-20 border border-mild-black rounded-lg'>
+            <div className='fixed right-5  py-2 w-12/13'>
+                <div className='flex items-center justify-between bg-white px-5 h-18 border border-mild-black rounded-lg'>
                     <div className="flex items-center space-x-2">
-                        <h2 className="text-2xl font-bold text-primary">{title}</h2>
+                        <h2 className="text-xl font-bold text-primary">{title}</h2>
                     </div>
                     <div className='flex items-center space-x-4'>
                         <div className="hidden md:flex flex-1 justify-center px-4">

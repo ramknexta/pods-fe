@@ -12,7 +12,7 @@ import {
 import Spinner from "../../components/loader/Spinner.jsx";
 import Error404 from "../../components/error/Error404.jsx";
 
-const WorkflowPreviewModel = ({ isDefault, branch_id, onClose }) => {
+const WorkflowPreviewModel = ({ isDefault, branch_id, setEmailTemplateId, setWhatsappTemplateId, setFormDataHandler, onClose }) => {
     const { mgmt_id } = useSelector((state) => state.auth);
     const [emailTemplatesDetails, setEmailTemplatesDetails] = useState([]);
     const [whatsappTemplatesDetails, setWhatsappTemplatesDetails] = useState([]);
@@ -29,6 +29,8 @@ const WorkflowPreviewModel = ({ isDefault, branch_id, onClose }) => {
 
     const [fetchDefaultWorkflow, { data: workflowData, isLoading: isFetching }] =
         useLazyFetchDefaultWorkflowQuery();
+
+    const rules = workflowData?.data[0]?.rules[0]
 
     // Fetch templates
     const { data: emailTemplates } = useFetchEmailTemplateQuery(
@@ -109,7 +111,7 @@ const WorkflowPreviewModel = ({ isDefault, branch_id, onClose }) => {
         }
     }, [emailTemplates, whatsappTemplates, fetchEmailTemplateByName, fetchWhatsappTemplateByName, mgmt_id]);
 
-    // Fetch templates with debouncing
+
     useEffect(() => {
         const timer = setTimeout(() => {
             fetchTemplatesWithDelay();
@@ -117,6 +119,48 @@ const WorkflowPreviewModel = ({ isDefault, branch_id, onClose }) => {
 
         return () => clearTimeout(timer);
     }, [fetchTemplatesWithDelay]);
+
+    useEffect(() => {
+        const actions = rules?.actions;
+        const event_data = rules?.event_data;
+
+        if (!Array.isArray(actions)) return;
+        if (!event_data) return;
+
+        setFormDataHandler(prev => ({
+            ...prev,
+            workflow_name: rules.event_name,
+            description: rules.description,
+            before: {
+                days: event_data.before.days,
+                remainder: event_data.before.remainder,
+                frequency: event_data.before.frequency,
+            },
+            after: {
+                days: event_data.after.days,
+                remainder: event_data.after.remainder,
+                frequency: event_data.after.frequency,
+            },
+        }))
+
+        const emailAction = actions.find(a => a.action_type === "email");
+        const whatsappAction = actions.find(a => a.action_type === "whatsapp");
+
+        if (emailAction) {
+            setEmailTemplateId({
+                before: emailAction.action_data.before_template_id,
+                after: emailAction.action_data.after_template_id,
+            });
+        }
+
+        if (whatsappAction) {
+            setWhatsappTemplateId({
+                before: whatsappAction.action_data.before_template_id,
+                after: whatsappAction.action_data.after_template_id,
+            });
+        }
+    }, [rules, setEmailTemplateId, setWhatsappTemplateId]);
+
 
     if (isLoading) return <Spinner />;
     if (isError) return <Error404 onClose={onClose} />

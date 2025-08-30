@@ -13,6 +13,8 @@ import CustomerCard from "./CustomerCard.jsx";
 import { handleTitleChange } from "../../store/slices/auth/authSlice.js"
 import BranchModal from "./BranchModel.jsx";
 import {useNavigate} from "react-router-dom";
+import toast from "react-hot-toast";
+
 
 const Management = () => {
     const dispatch = useDispatch();
@@ -122,7 +124,7 @@ const Management = () => {
             console.error("Operation failed:", err);
             const errorMessage = err.data?.message ||
                 "An error occurred. Please try again.";
-            // You might want to show this error to the user
+            toast.error(errorMessage);
         }
     };
 

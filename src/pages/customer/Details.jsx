@@ -135,16 +135,16 @@ const CompanyDetails = () => {
                             className="flex flex-wrap gap-2 mb-4"
                             variants={itemVariants}
                         >
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-blue-100 text-blue-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {company.risk} Risk
                             </span>
-                            <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-800">
+                            <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 {company.recommendation} Recommended
                               </span>
                         </motion.div>
 
                         <motion.p
-                            className="text-gray-600"
+                            className="text-gray-600 text-sm"
                             variants={itemVariants}
                         >
                             {company.about || "No description available"}
@@ -152,7 +152,7 @@ const CompanyDetails = () => {
                     </div>
 
                     <Link to="/allocation"
-                        className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                        className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-primary focus:outline-none transition-colors"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />

@@ -143,7 +143,7 @@ const Rooms = () => {
 
     const Modal = ({ isOpen, onClose, title, children, actionButton }) => (
         isOpen && (
-            <div className="max-w-6xl mx-auto fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 p-4">
+            <div className="max-w-5xl mx-auto mt-10 fixed inset-0 bg-opacity-50 flex justify-center items-center z-50 p-4">
                 <div className="bg-white rounded-xl shadow-xl w-full overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                         <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
@@ -163,7 +163,7 @@ const Rooms = () => {
                     <div className="px-6 py-4 bg-gray-50 flex justify-end space-x-3">
                         <button
                             onClick={onClose}
-                            className="px-4 py-2 text-gray-600 hover:text-gray-800 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
+                            className="px-4 py-2 text-sm cursor-pointer text-gray-600 hover:text-gray-800 font-medium rounded-lg border border-gray-300 hover:bg-gray-50 transition-colors"
                         >
                             Cancel
                         </button>
@@ -290,7 +290,7 @@ const Rooms = () => {
                                 Room Management
                             </h1>
                             <p className="text-gray-600 mt-1">
-                                Manage rooms for <strong className="text-blue-600">{branchName}</strong>
+                                Manage rooms for <strong className="text-gray-500">{branchName}</strong>
                             </p>
                         </div>
                     </div>
@@ -309,7 +309,7 @@ const Rooms = () => {
                         </div>
                         <button
                             onClick={() => setIsAddOpen(true)}
-                            className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+                            className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-primary focus:outline-none cursor-pointer transition-colors"
                         >
                             <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
@@ -353,7 +353,7 @@ const Rooms = () => {
                         <p className="text-gray-500 mb-4">Get started by adding your first room</p>
                         <button
                             onClick={() => setIsAddOpen(true)}
-                            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            className="px-4 py-2 bg-secondary text-white rounded-md cursor-pointer hover:bg-primary transition-colors"
                         >
                             Add Room
                         </button>
@@ -372,7 +372,7 @@ const Rooms = () => {
                         <button
                             onClick={handleAddRoom}
                             disabled={isAdding}
-                            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                            className="px-4 py-2  text-sm bg-secondary text-white font-medium rounded-lg hover:bg-primary focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
                         >
                             {isAdding ? (
                                 <span className="flex items-center">
@@ -472,7 +472,7 @@ const Rooms = () => {
                         <button
                             onClick={handleEditRoom}
                             disabled={isEditing}
-                            className="px-4 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
+                            className="px-4 py-2 text-sm bg-secondary text-white font-medium rounded-lg cursor-pointer hover:bg-primary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 transition-colors"
                         >
                             {isEditing ? (
                                 <span className="flex items-center">

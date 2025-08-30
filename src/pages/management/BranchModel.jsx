@@ -1,15 +1,7 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Icon } from "@iconify/react";
 
-const BranchModal = ({
-                         isOpen,
-                         isEdit,
-                         branchForm,
-                         formErrors,
-                         onInputChange,
-                         onSubmit,
-                         onClose,
-                     }) => {
+const BranchModal = ({ isOpen, isEdit, branchForm, formErrors, onInputChange, onSubmit, onClose}) => {
     const fields = [
         {
             name: "branch_name",
@@ -152,7 +144,7 @@ const BranchModal = ({
                                 whileTap={{ scale: 0.9 }}
                                 type="button"
                                 onClick={onClose}
-                                className="w-8 h-8 flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
+                                className="w-8 h-8 cursor-pointer flex items-center justify-center rounded-full bg-gray-100 hover:bg-gray-200 transition-colors"
                             >
                                 <Icon icon="mdi:close" className="w-5 h-5 text-gray-600" />
                             </motion.button>
@@ -219,7 +211,7 @@ const BranchModal = ({
                                     onClick={onClose}
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="px-5 py-2.5 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center"
+                                    className="px-5 py-2.5 text-sm bg-gray-100 text-gray-700 cursor-pointer rounded-lg hover:bg-gray-200 transition-colors font-medium flex items-center"
                                 >
                                     <Icon icon="mdi:close" className="w-4 h-4 mr-1" />
                                     Cancel
@@ -228,7 +220,7 @@ const BranchModal = ({
                                     type="submit"
                                     whileHover={{ scale: 1.02 }}
                                     whileTap={{ scale: 0.98 }}
-                                    className="px-5 py-2.5 bg-blue-600 text-white rounded-lg shadow-md hover:bg-blue-700 transition-colors font-medium flex items-center"
+                                    className="px-5 py-2.5 text-sm bg-secondary text-white cursor-pointer rounded-lg shadow-md hover:bg-primary transition-colors font-medium flex items-center"
                                 >
                                     <Icon
                                         icon={isEdit ? "mdi:pencil" : "mdi:plus"}

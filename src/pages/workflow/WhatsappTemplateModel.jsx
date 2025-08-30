@@ -228,7 +228,7 @@ const WhatsappTemplateModal = ({ onClose, beforeRemainder, afterRemainder, templ
     return (
         <AnimatePresence>
             <motion.div
-                className="fixed inset-0 backdrop-blur-sm bg-black/30 flex items-center justify-center z-50 p-4"
+                className="fixed inset-0 backdrop-blur-sm  flex items-center justify-center z-50 p-4"
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}

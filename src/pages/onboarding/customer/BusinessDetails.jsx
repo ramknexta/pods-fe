@@ -77,6 +77,7 @@ const BusinessDetails = ({handleInputChange, formData, errors, branches, default
                                 errors.branch_id ? 'border-red-500' : 'border-gray-300'
                             }`}
                         >
+                            <option value="">Select Branch</option>
                             {branches.map(branch => (
                                 <option key={branch.branch_id} value={branch.branch_id}>{branch.branch_name}</option>
                             ))}
@@ -99,7 +100,7 @@ const BusinessDetails = ({handleInputChange, formData, errors, branches, default
                         </label>
                     </div>
 
-                    {/*Todo: Need to add the workflow preview*/}
+                    {/*Todo: Need to add option for the workflow preview*/}
                     {!formData.workflow && (
                         <>
                             <div>
@@ -162,6 +163,7 @@ const BusinessDetails = ({handleInputChange, formData, errors, branches, default
                                         />
                                     </div>
                                 </div>
+                                {errors.before && <p className="mt-1 text-sm text-red-500">{errors.before}</p>}
                             </div>
 
                             <div>
@@ -201,6 +203,7 @@ const BusinessDetails = ({handleInputChange, formData, errors, branches, default
                                         />
                                     </div>
                                 </div>
+                                {errors.after && <p className="mt-1 text-sm text-red-500">{errors.after}</p>}
                             </div>
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">Actions</label>
@@ -230,6 +233,7 @@ const BusinessDetails = ({handleInputChange, formData, errors, branches, default
                                         />
                                     </div>
                                 </div>
+                                {errors.action && <p className="mt-1 text-sm text-red-500">{errors.action}</p>}
                             </div>
                         </>
                     )}

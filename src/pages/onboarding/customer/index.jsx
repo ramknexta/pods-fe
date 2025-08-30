@@ -14,6 +14,7 @@ import {useNavigate} from "react-router-dom";
 import WorkflowPreviewModel from "../../workflow/PreviewModel.jsx";
 import EmailTemplateModel from "../../workflow/EmailTemplateModel.jsx";
 import WhatsappTemplateModel from "../../workflow/WhatsappTemplateModel.jsx";
+import toast from "react-hot-toast";
 
 const STEP_CONFIG = [
     { id: 1, title: 'Company Details', desc: 'Basic details about your company', icon: 'mdi:office-building' },
@@ -98,7 +99,7 @@ const CustomerOnboarding = () => {
         dispatch(handleTitleChange("Onboard Customer"));
     },[])
 
-    const [onboardCustomer, { isLoading: isSubmitting }, refetch] = useOnboardCustomerMutation();
+    const [onboardCustomer, { isLoading: isSubmitting }] = useOnboardCustomerMutation();
     const { data: managementData } = useFetchDashboardDataQuery();
 
     const { branches = [] } = managementData || {};
@@ -286,13 +287,26 @@ const CustomerOnboarding = () => {
     const handleBack = () =>  navigate(-1)
 
 
-    const defaultModelhandler = () => {
+    const handleDefaultModel = () => {
+        if (!formData.workflow) {
+            setEmailTemplateId(prev => ({
+                ...prev,
+                before: [],
+                after: []
+            }))
+            setWhatsappTemplateId(prev => ({
+                ...prev,
+                before: [],
+                after: []
+            }))
+        }
+        setDefaultModelOpen(!defaultModelOpen)
         setDefaultModelOpen(!defaultModelOpen)
     };
-    const emailModelhandler = () => {
+    const handleEmailModel = () => {
         setEmailModelOpen(!emailModelOpen);
     }
-    const whatsappModelhandler = () => {
+    const handleWhatsappModel = () => {
         setWhatsappModelOpen(!whatsappModelOpen)
     };
 
@@ -328,7 +342,6 @@ const CustomerOnboarding = () => {
 
     const handleSubmit = useCallback(async () => {
         try {
-
             const rulePayload = {
                 rule: {
                     description: formData.description,
@@ -349,24 +362,48 @@ const CustomerOnboarding = () => {
                     },
                     workflow_id: 0,
                 },
-                actions: [
-                    {
-                        action_type: "email",
-                        action_data: {
-                            to: "Primary Contact",
-                            before_template_id: [1, 1, 1],
-                            after_template_id:  [1, 1, 1],
-                        },
+                actions: []
+            }
+
+            if (formData.workflow) {
+                rulePayload.actions.push({
+                    action_type: "email",
+                    action_data: {
+                        to: "Primary Contact",
+                        before_template_id: emailTemplateId.before,
+                        after_template_id:  emailTemplateId.after
                     },
-                    {
-                        action_type: "whatsapp",
-                        action_data: {
-                            to: "Primary Contact",
-                            before_template_id: [1, 1, 1],
-                            after_template_id:  [1, 1, 1],
-                        },
-                    }
-                ]
+                });
+                rulePayload.actions.push({
+                    action_type: "whatsapp",
+                    action_data: {
+                        to: "Primary Contact",
+                        before_template_id: whatsappTemplateId.before,
+                        after_template_id:  whatsappTemplateId.after,
+                    },
+                });
+            }
+
+            if (formData.action.email) {
+                rulePayload.actions.push({
+                    action_type: "email",
+                    action_data: {
+                        to: "Primary Contact",
+                        before_template_id: emailTemplateId.before,
+                        after_template_id:  emailTemplateId.after
+                    },
+                });
+            }
+
+            if (formData.action.whatsapp) {
+                rulePayload.actions.push({
+                    action_type: "whatsapp",
+                    action_data: {
+                        to: "Primary Contact",
+                        before_template_id: whatsappTemplateId.before,
+                        after_template_id:  whatsappTemplateId.after,
+                    },
+                });
             }
 
             const { after, before, description, action, ...rest } = formData;
@@ -382,9 +419,10 @@ const CustomerOnboarding = () => {
                 invoice: false
             };
 
-            const response = await onboardCustomer(payload).unwrap();
-            refetch()
+            await onboardCustomer(payload).unwrap();
+            toast.success('Customer onboarded successfully.');
             navigate('/dashboard')
+
         } catch (error) {
             console.error('Onboarding failed:', error);
         }
@@ -406,9 +444,9 @@ const CustomerOnboarding = () => {
             case 3:
                 return <BusinessDetails
                     {...stepProps}
-                    defaultModelhandler={defaultModelhandler}
-                    emailModelhandler={emailModelhandler}
-                    whatsappModelhandler={whatsappModelhandler}
+                    defaultModelhandler={handleDefaultModel}
+                    emailModelhandler={handleEmailModel}
+                    whatsappModelhandler={handleWhatsappModel}
                     />;
             case 4:
                 return (
@@ -459,7 +497,10 @@ const CustomerOnboarding = () => {
                     <WorkflowPreviewModel
                         branch_id={formData.branch_id}
                         isDefault={formData.workflow}
-                        onClose={defaultModelhandler}
+                        onClose={handleDefaultModel}
+                        setEmailTemplateId={setEmailTemplateId}
+                        setWhatsappTemplateId={setWhatsappTemplateId}
+                        setFormDataHandler={setFormData}
                     />
                 )}
                 {emailModelOpen && (
@@ -468,7 +509,7 @@ const CustomerOnboarding = () => {
                         afterRemainder={formData.after.remainder}
                         templateId={emailTemplateId}
                         onTemplateIdChange={handleEmailTemplateIdChange}
-                        onClose={emailModelhandler}
+                        onClose={handleEmailModel}
                     />
                 )}
                 {whatsappModelOpen && (
@@ -477,7 +518,7 @@ const CustomerOnboarding = () => {
                         afterRemainder={formData.after.remainder}
                         templateId={whatsappTemplateId}
                         onTemplateIdChange={handleWhatsappTemplateIdChange}
-                        onClose={whatsappModelhandler}
+                        onClose={handleWhatsappModel}
                     />
                 )}
             </div>

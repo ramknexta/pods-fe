@@ -148,13 +148,13 @@ const CustomersCarousel = () => {
             <div className="flex justify-between items-center mb-6">
                 <div className="flex items-center space-x-3">
                     <Icon icon="mdi:account-group" className="w-6 h-6 text-purple-500" />
-                    <h2 className="text-lg font-semibold text-gray-800">Management Customers</h2>
+                    <h2 className="text-lg font-semibold text-gray-800">Customers</h2>
                 </div>
                 <div className="flex items-center space-x-3">
-                    <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 flex items-center">
+                    {/* <button className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700 flex items-center">
                         <Icon icon="mdi:plus" className="mr-2" />
                         Manage All Customers
-                    </button>
+                    </button> */}
                     <button
                         onClick={toggleMinimize}
                         className="p-2 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100"

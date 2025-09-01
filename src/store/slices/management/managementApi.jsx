@@ -167,7 +167,7 @@ export const managementApi = createApi({
             query: (data) => ({
                 url: `/management/branches/${data.id}`,
                 method: "PUT",
-                body: data,
+                body: data.data,
             })
         }),
         deleteBranch: builder.mutation({

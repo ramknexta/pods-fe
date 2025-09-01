@@ -5,36 +5,7 @@ import {useFetchDashboardDataQuery} from "../../store/slices/management/manageme
 import ManagementCard from "../management/ManagementCard.jsx";
 import {useNavigate} from "react-router-dom";
 
-const stats = [
-    {
-        label: "Total Pods",
-        value: 6,
-        icon: <Icon icon='mdi:office-building' className="w-6 h-6 text-purple-500" />,
-        change: "+2 since last week",
-        trend: "up"
-    },
-    {
-        label: "Available",
-        value: 3,
-        icon: <Icon icon='mdi:check-circle' className="w-6 h-6 text-green-500" />,
-        change: "-1 since yesterday",
-        trend: "down"
-    },
-    {
-        label: "Booked",
-        value: 1,
-        icon: <Icon icon='mdi:calendar-check' className="w-6 h-6 text-blue-500" />,
-        change: "No change",
-        trend: "neutral"
-    },
-    {
-        label: "Maintenance",
-        value: 2,
-        icon: <Icon icon='mdi:tools' className="w-6 h-6 text-red-500" />,
-        change: "+1 since yesterday",
-        trend: "up"
-    },
-];
+
 
 const bookings = [
     { id: "BK001", customer: "John Smith", email: "johnsmith@example.com", pod: "Focus Pod", date: "Aug 5, 2024 09:00 AM", duration: "2h", status: "Confirmed", payment: "Paid ₹500" },
@@ -128,53 +99,23 @@ const Dashboard = () => {
 
     return (
         <Admin>
-            <div className="p-6 space-y-6  min-h-screen">
+            <div className="p-6 space-y-4 min-h-screen">
                 {/* Header */}
-                <div className="flex justify-between items-center">
+                <div className="flex justify-between items-center mb-2">
                     <h1 className="text-2xl font-bold text-gray-800 invisible">Dashboard Overview</h1>
                     <div className="flex space-x-3">
-                        <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
+                        {/* <button className="px-4 py-2 bg-white border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 flex items-center">
                             <Icon icon="mdi:filter" className="mr-2" />
                             Filters
-                        </button>
-                        <button className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 flex items-center">
+                        </button> */}
+                        {/* <button className="px-4 py-2 bg-indigo-600 border border-transparent rounded-lg text-sm font-medium text-white hover:bg-indigo-700 flex items-center">
                             <Icon icon="mdi:plus" className="mr-2" />
                             New Booking
-                        </button>
+                        </button> */}
                     </div>
                 </div>
 
                 {/* Stats Section */}
-                {/*<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">*/}
-                {/*    {stats.map((stat, i) => (*/}
-                {/*        <div*/}
-                {/*            key={i}*/}
-                {/*            className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md transition-shadow"*/}
-                {/*        >*/}
-                {/*            <div className="flex justify-between items-start">*/}
-                {/*                <div>*/}
-                {/*                    <p className="text-sm font-medium text-gray-500 mb-1">{stat.label}</p>*/}
-                {/*                    <h3 className="text-2xl font-bold text-gray-800">{stat.value}</h3>*/}
-                {/*                    <p className={`text-xs mt-2 flex items-center ${*/}
-                {/*                        stat.trend === "up" ? "text-red-500" :*/}
-                {/*                            stat.trend === "down" ? "text-green-500" : "text-gray-500"*/}
-                {/*                    }`}>*/}
-                {/*                        {stat.trend === "up" ? (*/}
-                {/*                            <Icon icon="mdi:arrow-up" className="mr-1" />*/}
-                {/*                        ) : stat.trend === "down" ? (*/}
-                {/*                            <Icon icon="mdi:arrow-down" className="mr-1" />*/}
-                {/*                        ) : null}*/}
-                {/*                        {stat.change}*/}
-                {/*                    </p>*/}
-                {/*                </div>*/}
-                {/*                <div className="bg-gray-100 p-3 rounded-lg">*/}
-                {/*                    {stat.icon}*/}
-                {/*                </div>*/}
-                {/*            </div>*/}
-                {/*        </div>*/}
-                {/*    ))}*/}
-                {/*</div>*/}
-
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
                     {mgmtStats.map((stat, i) => (
                         <div
@@ -196,7 +137,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Table Section */}
-                <div className="max-h-96 bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+                <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
                     <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Recent Bookings</h2>
                         <div className="relative">
@@ -209,7 +150,7 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="max-h-96 overflow-y-auto">
+                    <div className="max-h-80 overflow-y-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50">
                             <tr>

@@ -4,44 +4,47 @@ import Admin from "../../../layout/Admin.jsx";
 import {useAddManagementMutation} from "../../../store/slices/management/managementApi.jsx";
 import {useDispatch} from "react-redux";
 import {handleTitleChange} from "../../../store/slices/auth/authSlice.js";
+import toast from "react-hot-toast";
 
 const steps = ["Company Info", "Tax Info", "Branches", "Review"];
 
+const initialFormData= {
+    first_name: "",
+    last_name: "",
+    email: "",
+    company_name: "",
+    company_type: "",
+    country: "",
+    pan_no: "",
+    mobile_number: "",
+    integration: 1,
+    branches: [
+        {
+            branch_name: "",
+            address_line1: "",
+            state: "",
+            country: "",
+            location: "",
+            pincode: "",
+            gst: "",
+            rooms: [
+                {
+                    room_name: "",
+                    room_type: "seater",
+                    seater_capacity: 1,
+                    quantity: 1,
+                    monthly_cost: "",
+                    hourly_cost: "",
+                    default_discount: 0,
+                },
+            ],
+        },
+    ],
+}
+
 const Management = () => {
     const [step, setStep] = useState(0);
-    const [formData, setFormData] = useState({
-        first_name: "",
-        last_name: "",
-        email: "",
-        company_name: "",
-        company_type: "",
-        country: "",
-        pan_no: "",
-        mobile_number: "",
-        integration: 1,
-        branches: [
-            {
-                branch_name: "",
-                address_line1: "",
-                state: "",
-                country: "",
-                location: "",
-                pincode: "",
-                gst: "",
-                rooms: [
-                    {
-                        room_name: "",
-                        room_type: "seater",
-                        seater_capacity: 1,
-                        quantity: 1,
-                        monthly_cost: "",
-                        hourly_cost: "",
-                        default_discount: 0,
-                    },
-                ],
-            },
-        ],
-    });
+    const [formData, setFormData] = useState(initialFormData);
 
     const [errors, setErrors] = useState({});
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -225,9 +228,13 @@ const Management = () => {
         if (validateStep(step)) {
             setIsSubmitting(true);
             try {
-                const response = await addManagement(formData);
+                const response = await addManagement(formData).unwrap();
+                if (response.status) {
+                    toast.success("Management added successfully 🚀");
+                    setStep(0);
+                    setFormData(initialFormData);
+                }
                 console.log("Final Data:", response);
-                alert("Form submitted successfully 🚀");
             } catch (error) {
                 console.error("Submission error:", error);
                 alert("There was an error submitting the form. Please try again.");
@@ -725,8 +732,8 @@ const Management = () => {
                                                                         >
                                                                             <option value="seater">Seater</option>
                                                                             <option value="meeting">Meeting</option>
-                                                                            <option value="conference">Conference</option>
-                                                                            <option value="training">Training</option>
+                                                                            {/*<option value="conference">Conference</option>*/}
+                                                                            {/*<option value="training">Training</option>*/}
                                                                         </select>
                                                                     </div>
                                                                     <div>
@@ -965,9 +972,10 @@ const Management = () => {
                         <button
                             type="button"
                             onClick={handleSubmit}
+                            disabled={isSubmitting}
                             className="px-6 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition flex items-center"
                         >
-                            Submit
+                            { isSubmitting ? "Submitting..." : "Submit" }
                             <svg
                                 className="w-5 h-5 ml-2"
                                 fill="none"

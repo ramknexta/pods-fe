@@ -10,6 +10,7 @@ import Spinner from "../../components/loader/Spinner.jsx";
 const WhatsappTemplateModal = ({ onClose, beforeRemainder, afterRemainder, templateId, onTemplateIdChange }) => {
     const { mgmt_id } = useSelector((state) => state.auth);
     const [templatesDetails, setTemplatesDetails] = useState([]);
+    const [previewTemplate, setPreviewTemplate] = useState(null);
     const [isLoadingTemplates, setIsLoadingTemplates] = useState(false);
     const [selectedBefore, setSelectedBefore] = useState(templateId.before || []);
     const [selectedAfter, setSelectedAfter] = useState(templateId.after || []);
@@ -114,6 +115,8 @@ const WhatsappTemplateModal = ({ onClose, beforeRemainder, afterRemainder, templ
             selected: "bg-green-50"
         };
 
+        const stopPropagation = (e) => e.stopPropagation();
+
         return (
             <motion.div
                 whileHover={{ y: -2 }}
@@ -124,7 +127,14 @@ const WhatsappTemplateModal = ({ onClose, beforeRemainder, afterRemainder, templ
             >
                 <div className="flex justify-between items-start">
                     <div className="flex-1 min-w-0">
-                        <h5 className="font-semibold text-[14px] text-gray-800 truncate">{template.template_name}</h5>
+                        <div className='flex items-center gap-1'>
+                            <h5 className="font-semibold text-[14px] text-gray-800 truncate">{template.template_name}</h5>
+                            <div onClick={stopPropagation}>
+                                <button onClick={() => setPreviewTemplate(template)} className="p-2 rounded-lg hover:bg-gray-100" title="Preview template" aria-label="Preview template" style={{ background: "transparent"}}>
+                                    <Icon icon="fluent:eye-28-regular" width="22" height="22" />
+                                </button>
+                            </div>
+                        </div>
                         <p className="text-xs text-gray-600 mt-1 line-clamp-2">{template.subject}</p>
                     </div>
                     {isSelected && (
@@ -359,6 +369,22 @@ const WhatsappTemplateModal = ({ onClose, beforeRemainder, afterRemainder, templ
                                 )}
                             </div>
                         )}
+
+                        {
+                            previewTemplate && (
+                                <div className="p-5">
+                                    <p className="text-sm text-gray-700 mb-4">
+                                        <span className="font-medium text-gray-600">Subject:</span> {previewTemplate.subject}
+                                    </p>
+                                    <div className="bg-gray-50 p-4 rounded-lg border border-gray-200">
+                                        <div
+                                            className="text-[14px] prose prose-sm max-w-none text-secondary"
+                                            dangerouslySetInnerHTML={{ __html: previewTemplate.body || previewTemplate.content }}
+                                        />
+                                    </div>
+                                </div>
+                            )
+                        }
                     </div>
 
                     {/* Footer */}

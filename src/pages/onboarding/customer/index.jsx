@@ -8,13 +8,14 @@ import BusinessDetails from "./BusinessDetails.jsx";
 import RoomBooking from "./RoomBooking.jsx";
 import Review from "./Review.jsx";
 import Company from "./Company.jsx";
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {handleTitleChange} from "../../../store/slices/auth/authSlice.js";
 import {useNavigate} from "react-router-dom";
 import WorkflowPreviewModel from "../../workflow/PreviewModel.jsx";
 import EmailTemplateModel from "../../workflow/EmailTemplateModel.jsx";
 import WhatsappTemplateModel from "../../workflow/WhatsappTemplateModel.jsx";
 import toast from "react-hot-toast";
+import moment from "moment";
 
 const STEP_CONFIG = [
     { id: 1, title: 'Company Details', desc: 'Basic details about your company', icon: 'mdi:office-building' },
@@ -48,7 +49,7 @@ const initialFormData = {
     country: 'India',
     e_invoicing: false,
     workflow: false,
-    is_invoice: false,
+    is_invoice: true,
     workflow_name: 'default',
     description: '',
     action: {
@@ -69,6 +70,7 @@ const initialFormData = {
 };
 
 const CustomerOnboarding = () => {
+    const {mgmt_id} = useSelector(state => state.auth)
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState(initialFormData);
 
@@ -100,7 +102,7 @@ const CustomerOnboarding = () => {
     },[])
 
     const [onboardCustomer, { isLoading: isSubmitting }] = useOnboardCustomerMutation();
-    const { data: managementData } = useFetchDashboardDataQuery();
+    const { data: managementData, refetch } = useFetchDashboardDataQuery();
 
     const { branches = [] } = managementData || {};
 
@@ -132,6 +134,7 @@ const CustomerOnboarding = () => {
             if (!formData.first_name) newErrors.first_name = 'First name is required';
             if (!formData.last_name) newErrors.last_name = 'Last name is required';
             if (!formData.contact_email) newErrors.contact_email = 'Contact email is required';
+            if (formData.contact_email === formData.email) newErrors.contact_email = 'Contact email cannot be same as company email';
             else if (!/\S+@\S+\.\S+/.test(formData.contact_email)) newErrors.contact_email = 'Contact email is invalid';
             if (!formData.mobile) newErrors.mobile = 'Mobile number is required';
         }
@@ -413,14 +416,43 @@ const CustomerOnboarding = () => {
                 mgmt_id: branches[0]?.mgmt_id || ''
             }
 
+            const invoiceData = [{
+                customer: formData.name,
+                invoice_no: "INV-" + formData.name.slice(0,3).toUpperCase() + Math.floor(Math.random()*1000).toString() + "00",
+                issue_date: moment(formData.room_booking?.start_date).format('YYYY-MM-DD'),
+                due_date: moment(formData.room_booking?.end_date).format('YYYY-MM-DD'),
+                payment_term: 1,
+                amount: formData.room_booking?.total_amount,
+                amount_paid: 0,
+                currency: 'INR',
+                mgmt_id,
+                branch_id: formData.branch_id,
+                inv_typ: 'invoice',
+                recurring_invoice: true,
+                shp_dts: { },
+                frequency: formData.room_booking.booking_type === 'monthly' ? 'monthly' : 'weekly',
+                item_list: formData.room_booking.rooms.map((room, idx) => ({
+                    slNo: idx + 1,
+                    id: String(room.room_id),
+                    description: `${room.room_name} - ${room.room_type}`,
+                    hsn: room.hsn || 998313,
+                    qty: room.quantity_booked,
+                    unit_rate: Number(room.rate),
+                    cgst: 9,
+                    sgst: 9,
+                    auto_filled: true
+                }))
+            }];
+
             const payload = {
                 customer: [customerPayload],
                 rule: rulePayload,
-                invoice: false
+                invoice: invoiceData
             };
 
             await onboardCustomer(payload).unwrap();
             toast.success('Customer onboarded successfully.');
+            refetch()
             navigate('/dashboard')
 
         } catch (error) {

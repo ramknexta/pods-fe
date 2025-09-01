@@ -103,6 +103,12 @@ export const authApi = createApi({
                 body: data
             }),
         }),
+        checkMailAccess: builder.query({
+            query: () => '/mail/get-mail-sync-status',
+        }),
+        fetchRedirectingToken: builder.query({
+            query: () => '/user/redirecting-token',
+        })
     })
 })
 
@@ -120,4 +126,6 @@ export const {
     useFetchUserQuery,
     useUpdateUserMutation,
     useUpdateAdminMutation,
+    useLazyCheckMailAccessQuery,
+    useLazyFetchRedirectingTokenQuery,
 } = authApi;

@@ -2,7 +2,6 @@ import Admin from "../../layout/Admin.jsx";
 import { Icon } from "@iconify/react";
 import {useState} from "react";
 import {useFetchDashboardDataQuery} from "../../store/slices/management/managementApi.jsx";
-import ManagementCard from "../management/ManagementCard.jsx";
 import {useNavigate} from "react-router-dom";
 
 
@@ -30,9 +29,11 @@ const paymentConfig = {
 
 const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1);
-    const { data, isLoading } = useFetchDashboardDataQuery();
 
     const navigate = useNavigate();
+
+    const { data, isLoading } = useFetchDashboardDataQuery();
+
 
 
     if (isLoading) return <div>Loading...</div>;

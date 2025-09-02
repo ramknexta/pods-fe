@@ -3,17 +3,8 @@ import { Icon } from "@iconify/react";
 import {useState} from "react";
 import {useFetchDashboardDataQuery} from "../../store/slices/management/managementApi.jsx";
 import {useNavigate} from "react-router-dom";
+import {useFetchAllocationListQuery, useFetchRoomStatisticsQuery} from "../../store/slices/management/allocationApi.js";
 
-
-
-const bookings = [
-    { id: "BK001", customer: "John Smith", email: "johnsmith@example.com", pod: "Focus Pod", date: "Aug 5, 2024 09:00 AM", duration: "2h", status: "Confirmed", payment: "Paid ₹500" },
-    { id: "BK002", customer: "Emma Johnson", email: "emmaj@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 11:30 AM", duration: "1:30h", status: "Pending", payment: "Pending ₹480" },
-    { id: "BK003", customer: "Michael Brown", email: "mbrown@example.com", pod: "Meeting Room Beta", date: "Aug 5, 2024 02:30 PM", duration: "2h", status: "Cancelled", payment: "Failed ₹120" },
-    { id: "BK004", customer: "Sarah Williams", email: "sarahw@example.com", pod: "Creative Studio", date: "Aug 5, 2024 11:00 AM", duration: "1:30h", status: "Confirmed", payment: "Paid ₹600" },
-    { id: "BK005", customer: "David Miller", email: "davidm@example.com", pod: "Quiet Zone Delta", date: "Aug 5, 2024 01:00 PM", duration: "1h", status: "Confirmed", payment: "Paid ₹315" },
-    { id: "BK006", customer: "Lisa Anderson", email: "lisa@example.com", pod: "Collaboration Hub", date: "Aug 5, 2024 07:00 AM", duration: "2h", status: "Pending", payment: "Pending ₹250" },
-];
 
 const statusConfig = {
     Confirmed: { color: "bg-green-100 text-green-800", icon: "mdi:check-circle" },
@@ -34,6 +25,58 @@ const Dashboard = () => {
 
     const { data, isLoading } = useFetchDashboardDataQuery();
 
+    const {data: allocationStats} = useFetchRoomStatisticsQuery()
+
+    const { data: allocationList } = useFetchAllocationListQuery()
+
+    const bookings = allocationList?.data?.flatMap(customer =>
+        customer?.allocations.map(allocation => {
+            const startDate = new Date(allocation.start_date);
+            const endDate = new Date(allocation.end_date);
+
+            // Calculate duration
+            const diffMs = endDate - startDate;
+            const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+            const duration = diffMins > 0 ? `${diffHrs}h ${diffMins}m` : `${diffHrs}h`;
+
+            // Payment status (dummy logic — replace with real when you have it)
+            const paymentStatus = allocation.is_active
+                ? `Paid ₹${allocation.total_amount}`
+                : `Pending ₹${allocation.total_amount}`;
+
+            return {
+                id: allocation.id,  // allocation ID
+                customer: customer.name,
+                email: customer.email,
+                pod: allocation.room_name,
+                date: startDate.toLocaleString("en-US", {
+                    month: "short",
+                    day: "numeric",
+                    year: "numeric",
+                    hour: "numeric",
+                    minute: "2-digit",
+                    hour12: true
+                }),
+                duration,
+                status: allocation.is_active ? "Confirmed" : "Pending",
+                payment: paymentStatus
+            };
+        })
+    ) || [];
+
+    const allocationStatsCards = allocationStats?.data ? [
+        {
+            label: "Allocated Rooms",
+            value: allocationStats.data.total_allocated_rooms,
+            icon: <Icon icon='mdi:door' className="w-6 h-6 text-green-500" />,
+        },
+        {
+            label: "Allocated Amount",
+            value: `₹${allocationStats.data.total_allocated_amount.toLocaleString()}`,
+            icon: <Icon icon='mdi:currency-inr' className="w-6 h-6 text-yellow-500" />,
+        },
+    ] : [];
 
 
     if (isLoading) return <div>Loading...</div>;
@@ -100,7 +143,7 @@ const Dashboard = () => {
 
     return (
         <Admin>
-            <div className="p-6 space-y-4 min-h-screen">
+            <div className="px-6 space-y-4 min-h-screen">
                 {/* Header */}
                 <div className="flex justify-between items-center mb-2">
                     <h1 className="text-2xl font-bold text-gray-800 invisible">Dashboard Overview</h1>
@@ -117,7 +160,7 @@ const Dashboard = () => {
                 </div>
 
                 {/* Stats Section */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5">
                     {mgmtStats.map((stat, i) => (
                         <div
                             key={i}
@@ -135,11 +178,25 @@ const Dashboard = () => {
                             </div>
                         </div>
                     ))}
+                    {allocationStatsCards.map((stat, i) => (
+                        <div key={i} className="bg-white rounded-xl shadow-sm border border-gray-200 p-5 hover:shadow-md">
+                            <div className="flex justify-between items-center">
+                                <div>
+                                    <p className="text-sm font-medium text-gray-500">{stat.label}</p>
+                                    <h3 className="text-xl font-bold text-gray-800">{stat.value}</h3>
+                                </div>
+                                <div className="bg-gray-100 p-3 rounded-lg">
+                                    {stat.icon}
+                                </div>
+                            </div>
+                        </div>
+                    ))}
                 </div>
+
 
                 {/* Table Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
+                    <div className="px-6 py-3 border-b border-gray-200 flex justify-between items-center">
                         <h2 className="text-lg font-semibold text-gray-800">Recent Bookings</h2>
                         <div className="relative">
                             <input
@@ -151,7 +208,7 @@ const Dashboard = () => {
                         </div>
                     </div>
 
-                    <div className="max-h-80 overflow-y-auto">
+                    <div className="h-80 overflow-y-auto">
                         <table className="w-full">
                             <thead className="bg-gray-50">
                             <tr>

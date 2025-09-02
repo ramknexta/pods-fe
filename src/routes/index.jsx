@@ -23,6 +23,7 @@ const CustomerOnboarding = lazy(() => import('../pages/onboarding/customer/index
 const ManagementOnboarding = lazy(() => import('../pages/onboarding/management/index.jsx'))
 const CustomerDetails = lazy(() => import('../pages/customer/Details.jsx'))
 const RoomAllocation = lazy(() => import('../pages/rooms/Allocation.jsx'))
+const InvoiceGeneration = lazy(() => import('../pages/invoice/InvoiceGeneration.jsx'))
 
 const preLoginRoutes = [
     {
@@ -100,6 +101,11 @@ const adminRoutes = [
         component: RoomAllocation,
         path: '/allocation',
         title: 'Room Allocation'
+    },
+    {
+        component: InvoiceGeneration,
+        path: '/invoice/create',
+        title: 'Invoice Generation'
     }
 ]
 

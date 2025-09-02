@@ -34,6 +34,12 @@ export const allocationApi = createApi({
                 url: `/customer-room-allocation/${id}`,
                 method: "DELETE",
             }),
+        }),
+        fetchRoomStatistics: builder.query({
+            query: () => ({
+                url: "/customer-room-allocation/statistics",
+                method: "GET"
+            }),
         })
     })
 })
@@ -44,4 +50,5 @@ export const {
     useGetAvailableRoomsQuery,
     useAllocateRoomMutation,
     useRemoveRoomAllocationMutation,
+    useFetchRoomStatisticsQuery,
 } = allocationApi;

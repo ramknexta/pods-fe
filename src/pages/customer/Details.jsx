@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import Customer from "../../layout/Customer.jsx";
 import {Link, useSearchParams} from "react-router-dom";
 import { useSelector } from "react-redux";
-import { useFetchCustomerByIdQuery } from "../../store/slices/customer/customerApi.js";
+import { useFetchCustomersQuery} from "../../store/slices/customer/customerApi.js";
 import React from "react";
 
 // Animation variants
@@ -48,7 +48,7 @@ const CompanyDetails = () => {
     const [searchParams] = useSearchParams();
     const customerId = searchParams.get("customer_id");
 
-    const { data, isLoading, error } = useFetchCustomerByIdQuery(
+    const { data, isLoading, error } = useFetchCustomersQuery(
         { id: customerId, mgmt_id },
         { skip: !customerId }
     );

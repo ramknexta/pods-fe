@@ -13,15 +13,24 @@ export const customerApi = createApi({
         },
     }),
     endpoints: (builder) => ({
-        fetchCustomerById: builder.query({
-            query: ({id, mgmt_id}) => ({
-                url: `customer?id=${id}&mgmt_id=${mgmt_id}`,
-                method: "GET",
-            })
+        fetchCustomers: builder.query({
+            query: ({id, mgmt_id, customer_name}) => {
+
+                const params = new URLSearchParams();
+                params.append('mgmt_id', mgmt_id)
+
+                if (id) params.append('id', id)
+                if (customer_name) params.append('customerName', customer_name)
+
+                return ({
+                    url: `customer?${params}`,
+                    method: "GET",
+                })
+            }
         })
     })
 })
 
 export const {
-    useFetchCustomerByIdQuery,
+    useFetchCustomersQuery,
 } = customerApi;

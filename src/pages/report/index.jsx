@@ -6,6 +6,7 @@ import {
     useFetchInvoicesQuery, useLazyGetInvoicePdfQuery,
 } from "../../store/slices/invoice/invoiceApi.js";
 import { Icon } from "@iconify/react";
+import {Link} from "react-router-dom";
 
 const formatINR = (num) =>
     new Intl.NumberFormat("en-IN", {
@@ -123,6 +124,9 @@ const Report = () => {
                         <button className="px-4 py-2 border rounded-lg text-gray-600 text-sm  flex items-center gap-2 hover:bg-gray-50">
                             <Icon icon="mdi:file-delimited-outline" /> Export CSV
                         </button>
+                        <Link to="/invoice/create" className="px-4 py-2 border rounded-lg text-gray-600 text-sm  flex items-center gap-2 hover:bg-gray-50">
+                            <Icon icon="mdi:file" /> Create Invoice
+                        </Link>
                     </div>
                 </div>
 
@@ -270,7 +274,7 @@ const Report = () => {
 };
 
 const SummaryCard = ({ icon, label, value, color }) => (
-    <div className="bg-white p-6 rounded-xl shadow-md flex items-center gap-4">
+    <div className="bg-white p-6 rounded-xl shadow-lg shadow-gray-200 flex items-center gap-4">
         <div
             className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gray-50 ${color}`}
         >

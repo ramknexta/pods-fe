@@ -32,6 +32,13 @@ export const invoiceApi = createApi({
                 responseHandler: (response) => response.blob(),
             }),
         }),
+        createInvoice: builder.mutation({
+            query: (data) => ({
+                url: `/invoice/createInvoice`,
+                method: "POST",
+                body: data,
+            }),
+        })
     })
 })
 
@@ -39,4 +46,5 @@ export const {
     useFetchInvoicesQuery,
     useFetchInvoiceDetailsQuery,
     useLazyGetInvoicePdfQuery,
+    useCreateInvoiceMutation,
 } = invoiceApi;

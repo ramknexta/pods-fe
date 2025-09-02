@@ -20,22 +20,22 @@ const Sidebar = () => {
         {
             label: 'Management',
             path: '/management',
-            icon: 'mdi:account'
+            icon: 'material-symbols:dashboard-rounded'
         },
         {
             label: 'Pod',
             path: '/pod',
-            icon: 'mdi:desk'
+            icon: 'material-symbols:table-large-rounded'
         },
         {
             label: 'Report',
             path: '/report',
-            icon: 'mdi:state-machine'
+            icon: 'mdi:graph-box'
         },
         {
             label: 'Accounting',
             path: '/accounting',
-            icon: 'tdesign:dashboard-filled'
+            icon: 'tabler:file-invoice-filled'
         },
         {
             label: 'Setting',

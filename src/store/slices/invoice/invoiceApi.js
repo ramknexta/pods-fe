@@ -34,9 +34,15 @@ export const invoiceApi = createApi({
         }),
         createInvoice: builder.mutation({
             query: (data) => ({
-                url: `/invoice/createInvoice`,
+                url: `/invoice/createInvoice?mgmt_id=${data.mgmt_id}&branch_id=${data.branch_id}`,
                 method: "POST",
-                body: data,
+                body: data.data,
+            }),
+        }),
+        getInvoiceByNo: builder.query({
+            query: (invoice_no) => ({
+                url: `/invoice/byInvoiceNo?invoiceNo=${invoice_no}`,
+                method: "GET",
             }),
         })
     })
@@ -47,4 +53,5 @@ export const {
     useFetchInvoiceDetailsQuery,
     useLazyGetInvoicePdfQuery,
     useCreateInvoiceMutation,
+    useGetInvoiceByNoQuery,
 } = invoiceApi;

@@ -1,6 +1,6 @@
 import Admin from "../../layout/Admin.jsx";
 import { useFetchCustomersQuery } from "../../store/slices/customer/customerApi.js";
-import { useSelector } from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useCreateInvoiceMutation } from "../../store/slices/invoice/invoiceApi.js";
 import { onboardingInputStyle } from "../../utils/styles.js";
@@ -9,7 +9,9 @@ import { motion, AnimatePresence } from "framer-motion";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import moment from "moment";
-import {useFetchManagementQuery} from "../../store/slices/management/managementApi.jsx";
+import InvoiceMail from "./InvoiceMail.jsx";
+import toast from "react-hot-toast";
+import {handleTitleChange} from "../../store/slices/auth/authSlice.js";
 
 const InvoiceGeneration = () => {
     const { mgmt_id } = useSelector((state) => state.auth);
@@ -33,7 +35,7 @@ const InvoiceGeneration = () => {
     const [frequency, setFrequency] = useState('daily')
     const [terms, setTerms] = useState([''])
     const [isTerms, setIsTerms] = useState(false)
-    const [paymentTerms, setPaymentTerms] = useState(0)
+    const [mailModel, setMailModel] = useState(false)
     const [customFrequency, setCustomFrequency] = useState({
         every: 1,
         unit: 'days'
@@ -42,6 +44,8 @@ const InvoiceGeneration = () => {
     const [items, setItems] = useState([
         { id: 1, hsn: "", description: "", qty: 1, unit_rate: 0, sgst: 0, cgst: 0 },
     ]);
+
+    const dispatch = useDispatch();
 
     const { data: customerData } = useFetchCustomersQuery({ mgmt_id });
     const [createInvoice, { isLoading }] = useCreateInvoiceMutation();
@@ -52,6 +56,10 @@ const InvoiceGeneration = () => {
     const frequencyOptions = ["custom", 'daily', 'weekly', 'bi-weekly','monthly', 'quarterly', 'yearly']
     const unitOptions = ["days", "weeks", "months", "years"]
 
+
+    useEffect(() => {
+        dispatch(handleTitleChange("Invoice Generation"));
+    },[])
 
 
     useGSAP(() => {
@@ -99,6 +107,8 @@ const InvoiceGeneration = () => {
         // Validate items
         items.forEach((item, index) => {
             if (!item.description) newErrors[`item_${index}_description`] = "Description is required";
+            if (!item.hsn) newErrors[`item_${index}_hsn`] = "HSN is required";
+            if (item.hsn.length === 6) newErrors[`item_${index}_hsn_length`] = "HSN must be 6 digits";
             if (item.quantity <= 0) newErrors[`item_${index}_quantity`] = "Quantity must be greater than 0";
             if (item.unit_rate < 0) newErrors[`item_${index}_unitPrice`] = "Unit price cannot be negative";
             if (item.cgst < 0 || item.cgst > 100) newErrors[`item_${index}_tax`] = "Tax must be between 0 and 100";
@@ -229,25 +239,13 @@ const InvoiceGeneration = () => {
 
             if (isTerms) payload['terms_condition'] = terms
 
-            await createInvoice([payload]).unwrap();
+            const response = await createInvoice({data: [payload], mgmt_id, branch_id: selectedCustomer.branch_id}).unwrap();
 
-            gsap.fromTo(".success-message",
-                { scale: 0.8, opacity: 0 },
-                { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
-            );
-
-            setTimeout(() => {
-                setFormData({
-                    invoice_no: "",
-                    issue_date: "",
-                    due_date: "",
-                    payment_terms: "",
-                    notes: "",
-                });
-                setSelectedCustomer(null);
-                setSearchCustomer("");
-                setItems([{ id: Date.now(), description: "", qty: 1, unit_rate: 0, cgst: 0 }]);
-            }, 2000);
+            if (response.status)
+            {
+                toast.success("Invoice created successfully");
+                setMailModel(true)
+            }
 
         } catch (err) {
             console.error(err);
@@ -298,6 +296,26 @@ const InvoiceGeneration = () => {
         setTerms(terms.filter((_, i) => i !== index));
     };
 
+    const handleClose = () => {
+        setMailModel(false)
+        gsap.fromTo(".success-message",
+            { scale: 0.8, opacity: 0 },
+            { scale: 1, opacity: 1, duration: 0.5, ease: "back.out(1.7)" }
+        );
+        setFormData({
+            invoice_no: "",
+            issue_date: "",
+            due_date: "",
+            payment_terms: "",
+            notes: "",
+        });
+        setSelectedCustomer(null);
+        setSearchCustomer("");
+        setIsRecurring(false);
+        setIsTerms(false);
+        setItems([{ id: Date.now(), description: "", qty: 1, unit_rate: 0, cgst: 0 }]);
+    }
+
     return (
         <Admin customClassName="p-6">
             <motion.div
@@ -309,7 +327,7 @@ const InvoiceGeneration = () => {
             >
                 <div className="p-6">
                     <h1 className="text-2xl font-bold mb-6 flex items-center gap-2 text-gray-800">
-                        <Icon icon="mdi:file-document-edit-outline" className="text-indigo-600 text-3xl" />
+                        <Icon icon="mdi:file-document-edit-outline" className="text-secondary text-3xl" />
                         Invoice Generation
                     </h1>
 
@@ -453,14 +471,14 @@ const InvoiceGeneration = () => {
                             >
                                 <div className="flex justify-between items-center mb-4">
                                     <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        <Icon icon="mdi:table" className="text-indigo-600" />
+                                        <Icon icon="mdi:table" className="text-secondary" />
                                         Invoice Items
                                     </h2>
                                     <motion.button
                                         whileHover={{ scale: 1.05 }}
                                         whileTap={{ scale: 0.95 }}
                                         onClick={addItem}
-                                        className="px-4 py-2 rounded-lg bg-indigo-600 text-white flex items-center gap-1 hover:bg-indigo-700 transition-colors shadow-sm"
+                                        className="px-4 py-2 text-sm rounded-lg bg-secondary text-white flex items-center gap-1 hover:bg-primary transition-colors shadow-sm"
                                     >
                                         <Icon icon="mdi:plus-circle-outline" /> Add Item
                                     </motion.button>
@@ -522,6 +540,9 @@ const InvoiceGeneration = () => {
                                                             />
                                                             {errors[`item_${idx}_hsn`] && (
                                                                 <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_hsn`]}</div>
+                                                            )}
+                                                            {errors[`item_${idx}_hsn_length`] && (
+                                                                <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_hsn_length`]}</div>
                                                             )}
                                                         </div>
                                                     </td>
@@ -614,7 +635,7 @@ const InvoiceGeneration = () => {
                             >
                                 <div className="flex justify-between items-center">
                                     <h2 className="text-lg font-semibold flex items-center gap-2 text-gray-800">
-                                        <Icon icon="mdi:plus-circle-outline" className="text-indigo-600" />
+                                        <Icon icon="mdi:plus-circle-outline" className="text-secondary" />
                                         Additional Options
                                     </h2>
                                 </div>
@@ -624,12 +645,12 @@ const InvoiceGeneration = () => {
                                     <div className="md:col-span-2">
                                         <div className="flex items-center justify-between mb-4">
                                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                                <Icon icon="mdi:file-document-outline" className="text-indigo-500" />
+                                                <Icon icon="mdi:file-document-outline" className="text-secondary" />
                                                 Terms & Conditions
                                             </label>
                                             <button
                                                 onClick={() => setIsTerms(!isTerms)}
-                                                className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1"
+                                                className="text-xs text-secondary cursor-pointer hover:text-primary flex items-center gap-1"
                                             >
                                                 {isTerms ? 'Hide' : 'Add Terms'}
                                             </button>
@@ -657,7 +678,7 @@ const InvoiceGeneration = () => {
                                                 ))}
                                                 <button
                                                     onClick={addTerm}
-                                                    className="text-sm text-indigo-600 hover:text-indigo-800 flex items-center gap-1 mt-2"
+                                                    className="text-sm text-secondary hover:text-primary flex items-center gap-1 mt-2"
                                                 >
                                                     <Icon icon="mdi:plus" className="text-base" />
                                                     Add another term
@@ -670,7 +691,7 @@ const InvoiceGeneration = () => {
                                     <div className="md:col-span-2">
                                         <div className="flex items-center gap-3 mb-4">
                                             <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                                                <Icon icon="mdi:calendar-repeat" className="text-indigo-500" />
+                                                <Icon icon="mdi:calendar-repeat" className="text-secondary" />
                                                 Recurring Invoice
                                             </label>
                                             <label className="relative inline-flex items-center cursor-pointer">
@@ -680,13 +701,13 @@ const InvoiceGeneration = () => {
                                                     onChange={() => setIsRecurring(!isRecurring)}
                                                     className="sr-only peer"
                                                 />
-                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
+                                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary"></div>
                                             </label>
                                         </div>
                                         {isRecurring && (
                                             <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                                                 <div>
-                                                    <label className="block text-sm font-medium text-gray-700 mb-2">Frequency</label>
+                                                    <label className="block text-sm font-medium text-secondary mb-2">Frequency</label>
                                                     <select
                                                         name="frequency"
                                                         value={frequency}
@@ -730,8 +751,8 @@ const InvoiceGeneration = () => {
                                                         </div>
                                                     </div>
                                                 )}
-                                                <p className="text-sm text-gray-500 bg-blue-50 p-3 rounded-lg">
-                                                    <Icon icon="mdi:information-outline" className="inline mr-1 text-blue-500" />
+                                                <p className="text-sm text-secondary bg-gray-50 p-3 rounded-lg">
+                                                    <Icon icon="mdi:information-outline" className="inline mr-1 text-secondary" />
                                                     Invoice will be generated every {frequency === 'custom' ? `${customFrequency.every} ${customFrequency.unit.toLowerCase()}` : frequency}
                                                 </p>
                                             </div>
@@ -746,15 +767,15 @@ const InvoiceGeneration = () => {
                                 <motion.button
                                     whileHover={{ backgroundColor: "#e0e7ff" }}
                                     onClick={toggleSummary}
-                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-indigo-50 hover:bg-indigo-100 transition mb-3 border border-indigo-100"
+                                    className="w-full flex items-center justify-between px-4 py-3 rounded-xl bg-gray-50 hover:bg-gray-100 transition mb-3 border border-indigo-100"
                                 >
-                                    <span className="flex items-center gap-2 font-medium text-indigo-700">
+                                    <span className="flex items-center gap-2 font-medium text-secondary">
                                       <Icon icon="mdi:file-eye-outline" />
                                         {showSummary ? "Hide Invoice Summary" : "Show Invoice Summary"}
                                     </span>
                                     <Icon
                                         icon={showSummary ? "mdi:chevron-up" : "mdi:chevron-down"}
-                                        className="text-indigo-700"
+                                        className="text-secondary"
                                     />
                                 </motion.button>
 
@@ -769,7 +790,7 @@ const InvoiceGeneration = () => {
                                             {selectedCustomer ? (
                                                 <>
                                                     <div className="p-3 bg-blue-50 rounded-lg border border-blue-100">
-                                                        <p className="font-semibold text-blue-800">Bill To:</p>
+                                                        <p className="font-semibold text-secondary">Bill To:</p>
                                                         <p className="font-medium mt-1">{selectedCustomer.name}</p>
                                                         <p className="text-gray-600">{selectedCustomer.email}</p>
                                                         <p className="text-gray-600">{selectedCustomer.location}, {selectedCustomer.state}</p>
@@ -825,7 +846,7 @@ const InvoiceGeneration = () => {
                                                     <span className="font-medium">₹{totalTax.toFixed(2)}</span>
                                                 </div>
                                                 <hr className="border-gray-300" />
-                                                <div className="flex justify-between text-lg font-bold text-indigo-700 pt-2">
+                                                <div className="flex justify-between text-lg font-bold text-secondary pt-2">
                                                     <span>Grand Total:</span>
                                                     <span>₹{grandTotal.toFixed(2)}</span>
                                                 </div>
@@ -855,7 +876,7 @@ const InvoiceGeneration = () => {
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
                             onClick={handleSubmit}
-                            className="px-6 py-2.5 rounded-xl bg-indigo-600 text-white font-medium hover:bg-indigo-700 flex items-center gap-2 transition-colors shadow-md shadow-indigo-500/30"
+                            className="px-6 py-2.5 rounded-xl bg-secondary text-white font-medium hover:bg-primary flex items-center gap-2 transition-colors shadow-md shadow-indigo-500/30"
                             disabled={isLoading || isSubmitting}
                         >
                             {isLoading || isSubmitting ? (
@@ -880,19 +901,25 @@ const InvoiceGeneration = () => {
             </motion.div>
 
             {/* Toast Notifications */}
-            <AnimatePresence>
-                {isSubmitting && (
-                    <motion.div
-                        initial={{ opacity: 0, y: 50 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0, y: 50 }}
-                        className="fixed bottom-4 right-4 bg-secondary text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"
-                    >
-                        <Icon icon="mdi:loading" className="animate-spin" />
-                        Processing your invoice...
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {/*<AnimatePresence>*/}
+            {/*    {isSubmitting && (*/}
+            {/*        <motion.div*/}
+            {/*            initial={{ opacity: 0, y: 50 }}*/}
+            {/*            animate={{ opacity: 1, y: 0 }}*/}
+            {/*            exit={{ opacity: 0, y: 50 }}*/}
+            {/*            className="fixed bottom-4 right-4 bg-secondary text-white px-4 py-2 rounded-lg shadow-lg flex items-center gap-2"*/}
+            {/*        >*/}
+            {/*            <Icon icon="mdi:loading" className="animate-spin" />*/}
+            {/*            Processing your invoice...*/}
+            {/*        </motion.div>*/}
+            {/*    )}*/}
+            {/*</AnimatePresence>*/}
+
+            {
+                mailModel && (
+                    <InvoiceMail invoiceNo={formData.invoice_no} customer={selectedCustomer} onClose={handleClose} />
+                )
+            }
         </Admin>
     );
 };

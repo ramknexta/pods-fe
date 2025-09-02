@@ -35,14 +35,12 @@ const Report = () => {
     const { mgmt_id } = useSelector((state) => state.auth);
 
     const [page, setPage] = useState(1);
+    const [currentPage, setCurrentPage] = useState(1);
     const limit = 10;
 
     const { data: details } = useFetchInvoiceDetailsQuery(mgmt_id);
     const { data: invoices, isLoading } = useFetchInvoicesQuery( mgmt_id, page, limit, true);
     const [fetchInvoices] = useLazyGetInvoicePdfQuery();
-
-    const totalInvoices = invoices?.data?.total || 0;
-    const totalPages = Math.ceil(totalInvoices / limit);
 
     const handleDownload = async (id) => {
         try {
@@ -64,6 +62,19 @@ const Report = () => {
         }
     };
 
+    const totalInvoices = invoices?.data?.invoices.length || 0;
+    const totalPages = Math.ceil(totalInvoices / limit);
+
+    const paginatedInvoice = invoices?.data?.invoices.slice(
+        (currentPage - 1) * limit,
+        currentPage * limit
+    );
+
+    const handlePageChange = (page) => {
+        if (page >= 1 && page <= totalPages) {
+            setCurrentPage(page);
+        }
+    };
 
 
     return (
@@ -150,7 +161,7 @@ const Report = () => {
                     {isLoading ? (
                         <div className="p-6 text-center text-gray-500">Loading...</div>
                     ) : invoices?.data?.invoices?.length ? (
-                        <>
+                        <div className="h-60 overflow-y-auto">
                             <table className="min-w-full text-sm">
                                 <thead className="bg-gray-50">
                                 <tr>
@@ -178,7 +189,7 @@ const Report = () => {
                                 </tr>
                                 </thead>
                                 <tbody>
-                                {invoices.data.invoices.map((inv) => (
+                                {paginatedInvoice.map((inv) => (
                                     <tr
                                         key={inv.id}
                                         className="last:border-0 hover:bg-gray-50"
@@ -240,34 +251,47 @@ const Report = () => {
                                 ))}
                                 </tbody>
                             </table>
-
-                            {/* Pagination */}
-                            {totalPages > 1 && (
-                                <div className="flex justify-between items-center p-4 border-t bg-gray-50">
-                                    <button
-                                        onClick={() => setPage((p) => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                        className="px-3 py-1 rounded-md bg-white border text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Previous
-                                    </button>
-                                    <span className="text-sm text-gray-600">
-                                        Page {page} of {totalPages}
-                                    </span>
-                                    <button
-                                        onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                                        disabled={page === totalPages}
-                                        className="px-3 py-1 rounded-md bg-white border text-sm text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
-                                    >
-                                        Next
-                                    </button>
-                                </div>
-                            )}
-                        </>
+                        </div>
                     ) : (
                         <div className="p-6 text-center text-gray-500">No invoices found.</div>
                     )}
+                    <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
+                        <div className="text-sm text-gray-700">
+                            Showing
+                            <span className="font-medium">{(currentPage - 1) * limit + 1}</span> to <span className="font-medium">
+                                        {Math.min(currentPage * limit, totalPages)}
+                                    </span> of <span className="font-medium">{totalPages}</span> results
+                        </div>
+                        <div className="flex space-x-2">
+                            <button
+                                onClick={() => handlePageChange(currentPage - 1)}
+                                disabled={currentPage === 1}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium ${currentPage === 1 ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                                Previous
+                            </button>
+
+                            {[...Array(totalPages)].map((_, i) => (
+                                <button
+                                    key={i}
+                                    onClick={() => handlePageChange(i + 1)}
+                                    className={`px-3 py-1.5 rounded-md text-sm font-medium ${currentPage === i + 1 ? 'bg-indigo-100 text-indigo-700' : 'text-gray-700 hover:bg-gray-100'}`}
+                                >
+                                    {i + 1}
+                                </button>
+                            ))}
+
+                            <button
+                                onClick={() => handlePageChange(currentPage + 1)}
+                                disabled={currentPage === totalPages}
+                                className={`px-3 py-1.5 rounded-md text-sm font-medium ${currentPage === totalPages ? 'text-gray-400 cursor-not-allowed' : 'text-gray-700 hover:bg-gray-100'}`}
+                            >
+                                Next
+                            </button>
+                        </div>
+                    </div>
                 </div>
+
             </div>
         </Admin>
     );

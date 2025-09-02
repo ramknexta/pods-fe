@@ -108,6 +108,20 @@ export const authApi = createApi({
         }),
         fetchRedirectingToken: builder.query({
             query: () => '/user/redirecting-token',
+        }),
+        sendMail: builder.mutation({
+            query: (data) => ({
+                url: '/mail/send-mail',
+                method: 'POST',
+                body: data
+            }),
+        }),
+        sendWhatsapp: builder.mutation({
+            query: (data) => ({
+                url: '/whatsapp/sendwhatsapp',
+                method: 'POST',
+                body: data
+            }),
         })
     })
 })
@@ -128,4 +142,6 @@ export const {
     useUpdateAdminMutation,
     useLazyCheckMailAccessQuery,
     useLazyFetchRedirectingTokenQuery,
+    useSendMailMutation,
+    useSendWhatsappMutation,
 } = authApi;

@@ -107,15 +107,15 @@ const Login = () => {
     };
 
     return (
-        <div className="relative min-h-screen flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+        <div className="relative min-h-screen flex items-center py-12 px-4 sm:px-6 lg:px-8">
             {/* Left side with image */}
 
             <div className='fixed top-6 left-6'>
                 <img src={Logo} className="h-14 w-50" alt="" />
             </div>
 
-            <div className='flex justify-center items-center py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 w-full h-full'>
-                <div className="hidden lg:block relative w-full h-full">
+            <div className='flex justify-between py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-12 w-full h-full'>
+                <div className="hidden lg:block relative w-full h-full ">
                     <img
                         src={LoginImage}
                         alt="Login visual"
@@ -126,7 +126,7 @@ const Login = () => {
                 </div>
 
 
-                <div className="flex flex-col justify-center  px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-24 w-full lg:w-1/2">
+                <div className="flex flex-col justify-right py-5  px-4 sm:px-6 lg:flex-none lg:px-12 xl:px-12 w-full lg:w-1/2">
                     <div className="mx-auto w-full max-w-sm lg:w-96">
                         <div>
                             <h2 className="font-poppins mt-6 text-3xl text-center tracking-tight text-gray-900">
@@ -206,7 +206,7 @@ const Login = () => {
 
                                 <div className="flex items-center justify-end">
                                     <div className="text-sm">
-                                        <a href="#" className="font-medium text-blue-600 hover:text-blue-500">
+                                        <a href="#" className="font-medium text-secondary hover:text-primary">
                                             Forgot your password?
                                         </a>
                                     </div>
@@ -216,7 +216,7 @@ const Login = () => {
                                     <button
                                         type="submit"
                                         disabled={isLoading}
-                                        className="flex w-full justify-center rounded-md border border-transparent bg-blue-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-75"
+                                        className="flex w-full justify-center rounded-md border border-transparent bg-secondary py-2 px-4 text-sm font-medium text-white shadow-sm  disabled:opacity-75"
                                     >
                                         {isLoading ? (
                                             <span className="flex items-center">

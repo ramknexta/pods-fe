@@ -108,7 +108,6 @@ const InvoiceGeneration = () => {
         items.forEach((item, index) => {
             if (!item.description) newErrors[`item_${index}_description`] = "Description is required";
             if (!item.hsn) newErrors[`item_${index}_hsn`] = "HSN is required";
-            if (item.hsn.length === 6) newErrors[`item_${index}_hsn_length`] = "HSN must be 6 digits";
             if (item.quantity <= 0) newErrors[`item_${index}_quantity`] = "Quantity must be greater than 0";
             if (item.unit_rate < 0) newErrors[`item_${index}_unitPrice`] = "Unit price cannot be negative";
             if (item.cgst < 0 || item.cgst > 100) newErrors[`item_${index}_tax`] = "Tax must be between 0 and 100";
@@ -541,9 +540,7 @@ const InvoiceGeneration = () => {
                                                             {errors[`item_${idx}_hsn`] && (
                                                                 <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_hsn`]}</div>
                                                             )}
-                                                            {errors[`item_${idx}_hsn_length`] && (
-                                                                <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_hsn_length`]}</div>
-                                                            )}
+
                                                         </div>
                                                     </td>
                                                     <td className="px-2 py-3 text-center">
@@ -867,16 +864,8 @@ const InvoiceGeneration = () => {
                         <motion.button
                             whileHover={{ scale: 1.02 }}
                             whileTap={{ scale: 0.98 }}
-                            className="px-5 py-2.5 rounded-xl border border-gray-300 text-gray-700 hover:bg-gray-50 transition-colors font-medium shadow-sm"
-                            disabled={isLoading || isSubmitting}
-                        >
-                            Save Draft
-                        </motion.button>
-                        <motion.button
-                            whileHover={{ scale: 1.02 }}
-                            whileTap={{ scale: 0.98 }}
                             onClick={handleSubmit}
-                            className="px-6 py-2.5 rounded-xl bg-secondary text-white font-medium hover:bg-primary flex items-center gap-2 transition-colors shadow-md shadow-indigo-500/30"
+                            className="px-6 py-2.5 text-sm rounded-xl bg-secondary text-white font-medium hover:bg-primary flex items-center gap-2 transition-colors shadow-md shadow-indigo-500/30"
                             disabled={isLoading || isSubmitting}
                         >
                             {isLoading || isSubmitting ? (

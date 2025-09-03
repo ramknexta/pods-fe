@@ -114,7 +114,7 @@ const Login = () => {
                 <img src={Logo} className="h-14 w-50" alt="" />
             </div>
 
-            <div className='flex justify-between py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-12 w-full h-full'>
+            <div className='flex justify-between  py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-12 w-full h-full'>
                 <div className="hidden lg:block relative w-full h-full ">
                     <img
                         src={LoginImage}
@@ -126,8 +126,8 @@ const Login = () => {
                 </div>
 
 
-                <div className="flex flex-col justify-right py-5  px-4 sm:px-6 lg:flex-none lg:px-12 xl:px-12 w-full lg:w-1/2">
-                    <div className="mx-auto w-full max-w-sm lg:w-96">
+                <div className="flex justify-end py-5 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-12 lg:w-1/2">
+                    <div className="w-full max-w-lg">
                         <div>
                             <h2 className="font-poppins mt-6 text-3xl text-center tracking-tight text-gray-900">
                                 POD Booking
@@ -140,18 +140,6 @@ const Login = () => {
 
                         <div className="mt-8">
                             <form className="space-y-6" onSubmit={handleSubmit}>
-                                {errors.submit && (
-                                    <div className="rounded-md bg-red-50 p-4">
-                                        <div className="flex">
-                                            <div className="ml-3">
-                                                <h3 className="text-sm font-medium text-red-800">
-                                                    {errors.submit}
-                                                </h3>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-
                                 <div className="relative w-full">
                                     <label className="absolute -top-2 left-3 bg-white px-1 text-sm font-medium text-gray-700">
                                         Email address <span className="text-red-600">*</span>
@@ -204,7 +192,18 @@ const Login = () => {
                                     )}
                                 </div>
 
-                                <div className="flex items-center justify-end">
+                                <div className={`flex items-center ${errors.submit ? 'justify-between' : 'justify-end'}`}>
+                                    {errors.submit && (
+                                        <div className="rounded-md ">
+                                            <div className="flex">
+                                                <div className="">
+                                                    <h3 className="text-sm font-medium text-red-800">
+                                                        {errors.submit}
+                                                    </h3>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="text-sm">
                                         <a href="#" className="font-medium text-secondary hover:text-primary">
                                             Forgot your password?

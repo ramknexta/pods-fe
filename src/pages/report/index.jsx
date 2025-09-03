@@ -172,10 +172,10 @@ const Report = () => {
                                         Customer
                                     </th>
                                     <th className="px-6 py-3 text-left font-medium text-gray-600">
-                                        Pod Booked
+                                        Issue Date
                                     </th>
                                     <th className="px-6 py-3 text-left font-medium text-gray-600">
-                                        Date & Time
+                                        Due Date
                                     </th>
                                     <th className="px-6 py-3 text-left font-medium text-gray-600">
                                         Status
@@ -205,10 +205,10 @@ const Report = () => {
                                                 </div>
                                             </div>
                                         </td>
-                                        <td className="px-6 py-3 text-gray-600">{inv.pod_name}</td>
                                         <td className="px-6 py-3 text-gray-600">
                                             {fmtDateTime(inv.issue_date)}
                                         </td>
+                                        <td className="px-6 py-3 text-gray-600">{fmtDateTime(inv.due_date)}</td>
                                         <td className="px-6 py-3">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs font-medium ${
@@ -221,7 +221,7 @@ const Report = () => {
                                                                 : "bg-gray-100 text-gray-600"
                                                 }`}
                                             >
-                                              {inv.status}
+                                              {inv.status.charAt(0).toUpperCase() + inv.status.slice(1)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-3 font-semibold text-gray-800">

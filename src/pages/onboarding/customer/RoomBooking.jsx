@@ -124,8 +124,8 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                                         <div className="flex items-start justify-between mb-2">
                                             <h4 className="font-medium text-gray-900">{room.room_name}</h4>
                                             <span className="text-xs font-medium px-2 py-1 rounded-full bg-gray-100 text-gray-800 capitalize">
-                                                            {room.room_type}
-                                                          </span>
+                                                {room.room_type}
+                                            </span>
                                         </div>
 
                                         <div className="space-y-1 text-sm text-gray-600">

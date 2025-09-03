@@ -133,12 +133,12 @@ const Management = () => {
 
         try {
             await deleteBranch(branchId).unwrap();
-            refetch(); // Refresh data after successful deletion
+            refetch();
         } catch (err) {
             console.error("Delete failed:", err);
             const errorMessage = err.data?.message ||
                 "Failed to delete branch. Please try again.";
-            // You might want to show this error to the user
+            toast.error(errorMessage);
         }
     };
 

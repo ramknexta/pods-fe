@@ -226,7 +226,7 @@ const CustomerOnboarding = () => {
 
             if (existingIndex >= 0) {
                 if (quantity === 0) {
-                    newRooms.splice(existingIndex, 1); // remove
+                    newRooms.splice(existingIndex, 1);
                 } else {
                     newRooms[existingIndex] = {
                         ...newRooms[existingIndex],

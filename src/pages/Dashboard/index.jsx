@@ -196,15 +196,15 @@ const Dashboard = () => {
 
                 {/* Table Section */}
                 <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-                    <div className="px-6 py-3 border-b border-gray-200 flex justify-between items-center">
-                        <h2 className="text-lg font-semibold text-gray-800">Recent Bookings</h2>
+                    <div className="px-6 py-3 border-b border-gray-200 bg-secondary flex justify-between items-center">
+                        <h2 className="text-lg font-semibold text-white">Recent Bookings</h2>
                         <div className="relative">
                             <input
                                 type="text"
                                 placeholder="Search bookings..."
-                                className="pl-9 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
+                                className="pl-9 pr-4 py-2 border bg-white rounded-lg text-sm focus:outline-none w-full"
                             />
-                            <Icon icon="mdi:magnify" className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                            <Icon icon="mdi:magnify" className="absolute left-3 top-1/2 transform -translate-y-1/2  w-5 h-5" />
                         </div>
                     </div>
 

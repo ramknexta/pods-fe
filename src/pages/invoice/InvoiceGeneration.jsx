@@ -107,7 +107,11 @@ const InvoiceGeneration = () => {
         // Validate items
         items.forEach((item, index) => {
             if (!item.description) newErrors[`item_${index}_description`] = "Description is required";
-            if (!item.hsn) newErrors[`item_${index}_hsn`] = "HSN is required";
+            if (!item.hsn) {
+                newErrors[`item_${index}_hsn`] = "HSN is required";
+            } else if (!/^\d{6}$/.test(item.hsn)) {
+                newErrors[`item_${index}_hsn`] = "HSN must be exactly 6 digits";
+            }
             if (item.quantity <= 0) newErrors[`item_${index}_quantity`] = "Quantity must be greater than 0";
             if (item.unit_rate < 0) newErrors[`item_${index}_unitPrice`] = "Unit price cannot be negative";
             if (item.cgst < 0 || item.cgst > 100) newErrors[`item_${index}_tax`] = "Tax must be between 0 and 100";
@@ -483,17 +487,17 @@ const InvoiceGeneration = () => {
                                     </motion.button>
                                 </div>
 
-                                <div className="overflow-x-auto">
-                                    <table className="w-full border border-gray-200 rounded-lg text-sm">
-                                        <thead className="bg-gray-50">
+                                <div className="overflow-x-auto border border-gray-200 rounded-lg">
+                                    <table className="w-full text-sm">
+                                        <thead className="bg-secondary text-white">
                                         <tr>
-                                            <th className="px-4 py-3 text-left font-medium text-gray-700">Description</th>
-                                            <th className="px-4 py-3 text-left font-medium text-gray-700">HSN</th>
-                                            <th className="px-2 py-3 text-center font-medium text-gray-700">Qty</th>
-                                            <th className="px-2 py-3 text-center font-medium text-gray-700">Unit Price</th>
-                                            <th className="px-2 py-3 text-center font-medium text-gray-700">Tax %</th>
-                                            <th className="px-2 py-3 text-center font-medium text-gray-700">Total</th>
-                                            <th className="px-2 py-3 text-center font-medium text-gray-700"></th>
+                                            <th className="px-4 py-3 text-left font-medium">Description</th>
+                                            <th className="px-4 py-3 text-left font-medium">HSN</th>
+                                            <th className="px-2 py-3 text-center font-medium">Qty</th>
+                                            <th className="px-2 py-3 text-center font-medium">Unit Price</th>
+                                            <th className="px-2 py-3 text-center font-medium">Tax %</th>
+                                            <th className="px-2 py-3 text-center font-medium">Total</th>
+                                            <th className="px-2 py-3 text-center font-medium"></th>
                                         </tr>
                                         </thead>
                                         <tbody>

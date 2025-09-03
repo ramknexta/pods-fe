@@ -22,7 +22,6 @@ const ManagementCard = ({ branch, onEdit, onDelete }) => {
             onMouseLeave={() => setShowDetails(false)}
         >
             {/* Background accent */}
-            {/*<div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-blue-600"></div>*/}
 
             <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center">

@@ -22,9 +22,6 @@ const fmtDateTime = (iso) => {
             month: "short",
             day: "numeric",
             year: "numeric",
-        })} ${d.toLocaleTimeString("en-IN", {
-            hour: "2-digit",
-            minute: "2-digit",
         })}`;
     } catch {
         return "-";
@@ -79,7 +76,7 @@ const Report = () => {
 
     return (
         <Admin>
-            <div className="p-6 space-y-8">
+            <div className="p-6 space-y-6">
                 {/* Summary cards */}
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                     {details?.data ? (
@@ -142,7 +139,7 @@ const Report = () => {
                 </div>
 
                 {/* Tabs */}
-                <div >
+                <div>
                     <div className="flex gap-6">
                         <button className="pb-2 border-b-2 border-gray-900 text-gray-900 font-medium">
                             Invoices
@@ -161,29 +158,29 @@ const Report = () => {
                     {isLoading ? (
                         <div className="p-6 text-center text-gray-500">Loading...</div>
                     ) : invoices?.data?.invoices?.length ? (
-                        <div className="h-60 overflow-y-auto">
+                        <div className="h-70 overflow-y-auto">
                             <table className="min-w-full text-sm">
-                                <thead className="bg-gray-50">
+                                <thead className="bg-secondary text-white">
                                 <tr>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Invoice ID
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Customer
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Issue Date
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium ">
                                         Due Date
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Status
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Amount
                                     </th>
-                                    <th className="px-6 py-3 text-left font-medium text-gray-600">
+                                    <th className="px-6 py-3 text-left font-medium">
                                         Actions
                                     </th>
                                 </tr>

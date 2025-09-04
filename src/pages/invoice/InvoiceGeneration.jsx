@@ -149,7 +149,7 @@ const InvoiceGeneration = () => {
 
     const handleItemChange = (index, field, value) => {
         const updated = [...items];
-        updated[index][field] = field === "description" || field === 'hsn' ? value : Number(value);
+        updated[index][field] = value;
         setItems(updated);
 
         // Clear item errors if any
@@ -194,11 +194,11 @@ const InvoiceGeneration = () => {
     };
 
     const subtotal = items.reduce(
-        (acc, item) => acc + item.qty * item.unit_rate,
+        (acc, item) => acc + parseFloat(item.qty) * parseFloat(item.unit_rate),
         0
     );
     const totalTax = items.reduce(
-        (acc, item) => acc + (item.qty * item.unit_rate * item.cgst) / 100,
+        (acc, item) => acc + (parseFloat(item.qty) * (item.unit_rate) * parseFloat(item.cgst)) / 100,
         0
     );
     const grandTotal = subtotal + totalTax;
@@ -550,14 +550,14 @@ const InvoiceGeneration = () => {
                                                     <td className="px-2 py-3 text-center">
                                                         <div>
                                                             <input
-                                                                type="number"
-                                                                min="1"
+                                                                type="text"
                                                                 value={item.qty}
                                                                 onChange={(e) =>
                                                                     handleItemChange(idx, "qty", e.target.value)
                                                                 }
                                                                 className={`${onboardingInputStyle} ${errors[`item_${idx}_quantity`] ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''} text-center w-full`}
                                                                 data-error={`item_${idx}_quantity`}
+                                                                placeholder="e.g., 2"
                                                             />
                                                             {errors[`item_${idx}_quantity`] && (
                                                                 <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_quantity`]}</div>
@@ -567,15 +567,14 @@ const InvoiceGeneration = () => {
                                                     <td className="px-2 py-3 text-center">
                                                         <div>
                                                             <input
-                                                                type="number"
-                                                                min="0"
-                                                                step="0.01"
+                                                                type="text"
                                                                 value={item.unit_rate}
                                                                 onChange={(e) =>
                                                                     handleItemChange(idx, "unit_rate", e.target.value)
                                                                 }
                                                                 className={`${onboardingInputStyle} ${errors[`item_${idx}_unitPrice`] ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''} text-center w-full`}
                                                                 data-error={`item_${idx}_unitPrice`}
+                                                                placeholder="e.g., 100"
                                                             />
                                                             {errors[`item_${idx}_unitPrice`] && (
                                                                 <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_unitPrice`]}</div>
@@ -585,16 +584,14 @@ const InvoiceGeneration = () => {
                                                     <td className="px-2 py-3 text-center">
                                                         <div>
                                                             <input
-                                                                type="number"
-                                                                min="0"
-                                                                max="100"
-                                                                step="0.1"
+                                                                type="text"
                                                                 value={item.cgst}
                                                                 onChange={(e) =>
                                                                     handleItemChange(idx, "cgst", e.target.value)
                                                                 }
                                                                 className={`${onboardingInputStyle} ${errors[`item_${idx}_tax`] ? 'border-red-400 focus:border-red-500 focus:ring-red-500' : ''} text-center w-full`}
                                                                 data-error={`item_${idx}_tax`}
+                                                                placeholder="e.g., 5"
                                                             />
                                                             {errors[`item_${idx}_tax`] && (
                                                                 <div className="text-red-500 text-xs mt-1">{errors[`item_${idx}_tax`]}</div>

@@ -1,9 +1,11 @@
 import Admin from "../../layout/Admin.jsx";
 import { Icon } from "@iconify/react";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {useFetchDashboardDataQuery} from "../../store/slices/management/managementApi.jsx";
 import {useNavigate} from "react-router-dom";
 import {useFetchAllocationListQuery, useFetchRoomStatisticsQuery} from "../../store/slices/management/allocationApi.js";
+import { useDispatch } from "react-redux";
+import {handleTitleChange} from "../../store/slices/auth/authSlice.js";
 
 
 const statusConfig = {
@@ -22,23 +24,32 @@ const Dashboard = () => {
     const [currentPage, setCurrentPage] = useState(1);
 
     const navigate = useNavigate();
+    const dispatch = useDispatch()
 
     const { data, isLoading } = useFetchDashboardDataQuery();
-
     const {data: allocationStats} = useFetchRoomStatisticsQuery()
-
     const { data: allocationList } = useFetchAllocationListQuery()
+
+    useEffect(() => {
+        dispatch(handleTitleChange("Dashboard"));
+    },[])
 
     const bookings = allocationList?.data?.flatMap(customer =>
         customer?.allocations.map(allocation => {
             const startDate = new Date(allocation.start_date);
-            const endDate = new Date(allocation.end_date);
+            const endDate = allocation.end_date ? new Date(allocation.end_date) : null;
 
-            // Calculate duration
-            const diffMs = endDate - startDate;
-            const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
-            const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
-            const duration = diffMins > 0 ? `${diffHrs}h ${diffMins}m` : `${diffHrs}h`;
+            let duration;
+            if (endDate) 
+            {
+                const diffMs = endDate - startDate;
+                const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+                const diffMins = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                duration = diffMins > 0 ? `${diffHrs}h ${diffMins}m` : `${diffHrs}h`;
+            } else 
+            {
+                duration = "Ongoing";
+            }
 
             // Payment status (dummy logic — replace with real when you have it)
             const paymentStatus = allocation.is_active

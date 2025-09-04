@@ -9,6 +9,7 @@ import {
 } from "../../store/slices/management/allocationApi.js";
 import {useDispatch, useSelector} from "react-redux";
 import {handleTitleChange} from "../../store/slices/auth/authSlice.js";
+import {useSearchParams} from "react-router-dom";
 
 // Animation variants
 const containerVariants = {
@@ -82,6 +83,9 @@ const RoomAllocation = () => {
 
     const dispatch = useDispatch();
 
+    const [searchParams] = useSearchParams();
+    const customerId = searchParams.get("id");
+
     const { data, error, isLoading:loading, refetch } = useFetchAllocationListQuery()
 
     const [getAvailableRooms] = useLazyGetAvailableRoomsQuery();
@@ -93,11 +97,15 @@ const RoomAllocation = () => {
     },[])
 
     useEffect(() => {
-        if (data?.data) {
+        if (data?.data && customerId)
+        {
+            const found = data?.data.filter(c => String(c.id) === String(customerId));
+            setCustomers(found || []);
+        }
+        else if (data?.data) {
             setCustomers(data.data);
         }
     }, [data]);
-
 
     const validateForm = () => {
         const newErrors = {};

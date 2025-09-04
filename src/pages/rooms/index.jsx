@@ -197,7 +197,7 @@ const Rooms = () => {
                         </button>
                     </div>
                 ) : data?.data?.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                    <div className="grid grid-cols-1 p-5 md:grid-cols-2 lg:grid-cols-3 gap-5 max-h-[50vh] overflow-y-auto">
                         {data.data.map((room) => (
                             <div key={room.id} className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden hover:shadow-md transition-all duration-200">
                                 <div className="p-5">

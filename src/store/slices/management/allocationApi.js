@@ -24,7 +24,7 @@ export const allocationApi = createApi({
         }),
         allocateRoom: builder.mutation({
             query: (data, id) => ({
-                url: `/customer-room-allocation/${id}/allocate`,
+                url: `/customer-room-allocation/${data.customer_id}/allocate`,
                 method: "POST",
                 body: data,
             }),

@@ -151,7 +151,7 @@ const CompanyDetails = () => {
                         </motion.p>
                     </div>
 
-                    <Link to="/allocation"
+                    <Link to={`/allocation?id=${customerId}`}
                         className="mt-4 md:mt-0 inline-flex items-center px-4 py-2 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-secondary hover:bg-primary focus:outline-none transition-colors"
                     >
                         <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">

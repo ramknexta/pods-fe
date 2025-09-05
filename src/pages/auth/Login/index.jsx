@@ -74,8 +74,6 @@ const Login = () => {
 
             const result = response.data
 
-            console.log(result)
-
             dispatch(setLoginCredentials({
                 token: result.token,
                 user: result.full_name,

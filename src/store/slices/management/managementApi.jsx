@@ -130,6 +130,12 @@ export const managementApi = createApi({
                 }
             },
         }),
+        fetchAllRooms: builder.query({
+            query: () => ({
+                url: "/management/rooms/all",
+                method: "GET"
+            }),
+        }),
         fetchRoomByBranchId: builder.query({
             query: (id) => ({
                 url: `/management/rooms?branch_id=${id}`,
@@ -185,6 +191,7 @@ export const {
     useFetchBranchByMgmtIdQuery,
     useFetchAvailableRoomsQuery,
     useFetchDashboardDataQuery,
+    useFetchAllRoomsQuery,
     useFetchRoomByBranchIdQuery,
     useAddBranchRoomMutation,
     useEditBranchRoomMutation,

@@ -6,6 +6,7 @@ import {useNavigate} from "react-router-dom";
 import {useFetchAllocationListQuery, useFetchRoomStatisticsQuery} from "../../store/slices/management/allocationApi.js";
 import { useDispatch } from "react-redux";
 import {handleTitleChange} from "../../store/slices/auth/authSlice.js";
+import Spinner from "../../components/loader/Spinner.jsx";
 
 
 const statusConfig = {
@@ -90,8 +91,6 @@ const Dashboard = () => {
     ] : [];
 
 
-    if (isLoading) return <div>Loading...</div>;
-
     if (!data) return <div>No data available</div>;
 
     const {
@@ -169,6 +168,8 @@ const Dashboard = () => {
                         </button> */}
                     </div>
                 </div>
+
+                { isLoading && <Spinner />}
 
                 {/* Stats Section */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-5">

@@ -10,6 +10,7 @@ import {
 import RoomModel from "../rooms/RoomModel.jsx";
 import {useSelector} from "react-redux";
 
+
 const Pod = () => {
     const { mgmt_id } = useSelector((state) => state.auth);
     const [pods, setPods] = useState([]);
@@ -107,6 +108,7 @@ const Pod = () => {
 
     const closeAddModel = (() => {
         setIsAddOpen(false);
+        setSelectedBranchId(null);
         refetch();
     })
 

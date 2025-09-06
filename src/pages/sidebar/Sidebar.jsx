@@ -4,6 +4,7 @@ import {Link} from "react-router-dom";
 import {useDispatch, useSelector} from "react-redux";
 import {handleTitleChange} from "../../store/slices/auth/authSlice.js";
 import Logo from "../../assets/Logo.svg"
+import StartUpLogo from "../../assets/startupTN_logo.png"
 import {user} from "../../utils/constants.js";
 
 const Sidebar = () => {
@@ -77,8 +78,16 @@ const Sidebar = () => {
 
     return (
         <div className='fixed w-20 h-full px-3 py-2 z-50'>
-            <div className='h-full w-18 border border-mild-black rounded-lg flex flex-col items-center bg-white'>
-                <img src={Logo} alt="Logo" height={28} width={28} className='mt-5' />
+            <div className='h-full w-18 border border-mild-black rounded-2xl flex flex-col items-center bg-white'>
+                <div className='relative mt-5'>
+                    <div className="fixed left-5 z-10 bg-[#253B80] rounded-full shadow-lg w-8 h-8 flex items-center justify-center">
+                        <img src={StartUpLogo} alt="Logo" height={14} width={14}/>
+                    </div>
+                    <div className="fixed left-11 z-20  bg-white rounded-full shadow-lg w-8 h-8 flex items-center justify-center">
+                        <img src={Logo} alt="Logo" height={15} width={15} />
+                    </div>
+
+                </div>
                 <div className='flex flex-col gap-5 items-center justify-center h-3/4 w-full'>
                     {
                         sidebar.map((icon, index) => (

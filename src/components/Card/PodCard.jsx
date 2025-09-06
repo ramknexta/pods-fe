@@ -14,7 +14,7 @@ const availabilityClasses = {
 };
 const DEFAULT_POD_IMAGE = "https://images.pexels.com/photos/2325447/pexels-photo-2325447.jpeg";
 
-export const PodCard = React.memo(({ pod, onEdit, onDelete }) => {
+export const PodCard = React.memo(({ pod, onEdit, onDelete, handlePodSelect, selectedPod }) => {
     const { role } = useSelector((state) => state.auth);
 
     const handleEdit = useCallback(() => onEdit(pod), [onEdit, pod]);
@@ -25,8 +25,9 @@ export const PodCard = React.memo(({ pod, onEdit, onDelete }) => {
     const hourlyPrice = pod.hourly_cost ? `${pod.hourly_cost}/hr` : "Price not set";
     const defaultTags = pod.room_type ? [pod.room_type] : ["workspace"];
 
+
     return (
-        <div className="bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg">
+        <div className={`bg-white rounded-2xl shadow-md overflow-hidden transition-all duration-200 hover:shadow-lg`}>
             <div className="relative">
                 <img
                     src={DEFAULT_POD_IMAGE}
@@ -36,22 +37,26 @@ export const PodCard = React.memo(({ pod, onEdit, onDelete }) => {
                 />
                 <div className="absolute top-2 left-2 flex gap-2">
                     <Badge
-                        label={pod.status || POD_STATUS.INACTIVE}
-                        className={statusClasses[pod.status] || statusClasses[POD_STATUS.INACTIVE]}
+                        label={pod.status || POD_STATUS.ACTIVE}
+                        className={statusClasses[pod.status] || statusClasses[POD_STATUS.ACTIVE]}
                     />
                     <Badge
-                        label={pod.availability || AVAILABILITY_STATUS.MAINTENANCE}
-                        className={availabilityClasses[pod.availability] || availabilityClasses[AVAILABILITY_STATUS.MAINTENANCE]}
+                        label={pod.available_quantity !== 0 ? AVAILABILITY_STATUS.AVAILABLE : AVAILABILITY_STATUS.BOOKED}
+                        className={availabilityClasses[pod.available_quantity !== 0 ? AVAILABILITY_STATUS.AVAILABLE : AVAILABILITY_STATUS.BOOKED] || availabilityClasses[AVAILABILITY_STATUS.MAINTENANCE]}
                     />
                 </div>
             </div>
 
             <div className="p-4">
                 <h3 className="text-lg font-semibold text-gray-800">{pod.room_name || "Unnamed Pod"}</h3>
-                <p className="text-gray-600 font-medium">{monthlyPrice}</p>
-                <p className="text-gray-600 font-medium">{hourlyPrice}</p>
-                <p className="text-gray-500 text-sm mt-1">Capacity: {pod.seater_capacity || "N/A"}</p>
-                <p className="text-gray-500 text-sm mt-1">Unit: {pod.quantity || 0}</p>
+                <div className="flex justify-between items-center mt-2">
+                    <p className="text-gray-600 font-medium">{monthlyPrice}</p>
+                    <p className="text-gray-600 font-medium">{hourlyPrice}</p>
+                </div>
+                <div className='flex justify-between items-center mt-2'>
+                    <p className="text-gray-500 text-sm mt-1">Available: {pod.available_quantity || "N/A"}</p>
+                    <p className="text-gray-500 text-sm mt-1">Unit: {pod.quantity || 0}</p>
+                </div>
 
                 <div className="flex flex-wrap gap-2 mt-3">
                     {defaultTags.map((tag) => (
@@ -63,11 +68,11 @@ export const PodCard = React.memo(({ pod, onEdit, onDelete }) => {
                     {
                         role === user.CUSTOMER ? (
                             <button
-                                onClick={handleEdit}
-                                className="bg-secondary hover:bg-primary text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200"
+                                onClick={() => handlePodSelect(pod)}
+                                className={`${selectedPod?.id === pod?.id ? "bg-green-500 hover:bg-green-600": "bg-secondary hover:bg-primary"} text-white px-4 py-2 rounded-lg text-sm transition-colors duration-200`}
                                 aria-label={`Select ${pod.room_name || "pod"}`}
                             >
-                                Select
+                                {selectedPod?.id === pod?.id ? "Selected": "Select"}
                             </button>
                         ) : (
                             <>

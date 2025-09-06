@@ -13,7 +13,7 @@ import {invoiceApi} from "./slices/invoice/invoiceApi.js";
 const authPersistConfig = {
     key: "auth",
     storage,
-    whitelist: ["user", "token", "role", "mgmt_id"]
+    whitelist: ["user", "token", "role", "mgmt_id", "branch_id"]
 }
 
 export const rootReducer = combineReducers({

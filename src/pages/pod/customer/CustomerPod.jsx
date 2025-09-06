@@ -1,8 +1,10 @@
 import Customer from "../../../layout/Customer.jsx";
-import React, {useMemo, useState} from "react";
+import React, {useCallback, useEffect, useMemo, useState} from "react";
 import WorkSpace from "./WorkSpace.jsx";
 import Schedule from "./Schedule.jsx";
 import Review from "./Review.jsx";
+import {useSelector} from "react-redux";
+import {useFetchAvailableRoomsQuery} from "../../../store/slices/management/managementApi.jsx";
 
 const steps = ["Workspace", "Schedule", "Review", "Success"];
 const header = [
@@ -25,9 +27,32 @@ const header = [
 ]
 
 const CustomerPod = () => {
+    const { branch_id } = useSelector(state => state.auth)
+
+    const [pods, setPods] = useState([]);
+    const [selectedPod, setSelectedPod] = useState(null);
     const [step, setStep] = useState(0);
 
+    const {data: availableRooms} = useFetchAvailableRoomsQuery(branch_id, {skip: !branch_id})
+
+    useEffect(() => {
+        if (availableRooms?.data){
+            setPods(availableRooms.data || [])
+        }
+    },[availableRooms])
+
+
+    const handlePodSelect = useCallback(pod => {
+        if (selectedPod?.id === pod.id) {
+            setSelectedPod(null);
+            return;
+        }
+        setSelectedPod(pod);
+    },[selectedPod])
+
+
     const handleContinue = () => {
+        if (!selectedPod) return;
         if (step < steps.length - 1) setStep(step + 1);
     };
 
@@ -38,9 +63,9 @@ const CustomerPod = () => {
     const renderStep = useMemo(() => {
         switch (step) {
             case 0:
-                return <WorkSpace />;
+                return <WorkSpace pods={pods} selectedPod={selectedPod} handlePodSelect={handlePodSelect} />;
             case 1:
-                return <Schedule />;
+                return <Schedule selectedPod={selectedPod} />;
             case 2:
                 return <Review />;
             case 3:
@@ -48,12 +73,12 @@ const CustomerPod = () => {
             default:
                 return null;
         }
-    }, [step]);
+    }, [step, pods, selectedPod, handlePodSelect]);
 
     return (
         <Customer>
-            <section className='p-6'>
-                <div className='flex justify-center gap-2 mb-5 '>
+            <section className='p-6 overflow-y-auto h-full'>
+                <div className='flex justify-center gap-2 mb-5'>
                     {
                         [1, 2, 3, 4].map((i, index) => (
                             <div key={index} className={`${step === index ? 'w-20': 'w-10'} h-2 bg-gray-500 rounded-xl`}></div>

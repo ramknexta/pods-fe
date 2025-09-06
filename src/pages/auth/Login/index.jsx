@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import LoginImage from "../../../assets/pod_admin_login.png";
+import StartupTN from "../../../assets/startupTN.png"
 import Logo from "../../../assets/pod_logo.png";
 import { useLazyCheckMailAccessQuery, useLazyFetchRedirectingTokenQuery,
     useLoginMutation
@@ -79,6 +80,7 @@ const Login = () => {
                 user: result.full_name,
                 role: result.role,
                 mgmt_id: result.mgmt_id,
+                branch_id: result.branch_id,
             }))
 
 
@@ -108,8 +110,11 @@ const Login = () => {
         <div className="relative min-h-screen flex items-center py-12 px-4 sm:px-6 lg:px-8">
             {/* Left side with image */}
 
-            <div className='fixed top-6 left-6'>
+            <div className='fixed top-6 left-30'>
                 <img src={Logo} className="h-14 w-50" alt="" />
+            </div>
+            <div className='fixed top-8 right-30'>
+                <img src={StartupTN} className="h-10 w-50" alt="" />
             </div>
 
             <div className='flex justify-between  py-12 px-4 sm:px-6 lg:flex-none lg:px-20 xl:px-12 w-full h-full'>

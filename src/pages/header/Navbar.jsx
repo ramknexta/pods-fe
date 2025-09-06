@@ -2,6 +2,8 @@ import {Icon} from "@iconify/react";
 import {useSelector} from "react-redux";
 import {persistor} from "../../store/store.js";
 import {useNavigate} from "react-router-dom";
+import Profile from "../../assets/profile.jpg";
+
 
 const Navbar = () => {
     const {title} = useSelector((state) => state.auth);
@@ -44,7 +46,7 @@ const Navbar = () => {
                         <div className="relative group">
                             <button className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition">
                                 <div className="w-8 h-8 rounded-full bg-primary text-white flex items-center justify-center font-medium">
-                                    {/*<User className="h-4 w-4" />*/}
+                                    <img src={Profile} alt="Logo" className="w-8 h-8 object-bottom rounded-full" />
                                 </div>
                             </button>
 

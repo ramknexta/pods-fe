@@ -5,6 +5,7 @@ const initialState = {
     role: null,
     token: null,
     mgmt_id: null,
+    branch_id: null,
     loading: false,
     error: null,
     title: null,
@@ -15,11 +16,12 @@ const authSlice = createSlice({
     initialState,
     reducers: {
         setLoginCredentials: (state, action) => {
-            const {user, role, token, mgmt_id} = action.payload;
+            const {user, role, token, mgmt_id, branch_id} = action.payload;
             state.user = user;
             state.role = role;
             state.token = token;
             state.mgmt_id = mgmt_id;
+            state.branch_id = branch_id;
         },
         setUserType: (state, action) => {
             state.userType = action.payload;

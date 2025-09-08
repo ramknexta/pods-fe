@@ -1,7 +1,11 @@
 import {useCallback, useEffect, useMemo, useState} from 'react';
 import { Icon } from '@iconify/react';
 import Admin from "../../../layout/Admin.jsx";
-import {useFetchDashboardDataQuery, useFetchRoomByBranchIdQuery} from "../../../store/slices/management/managementApi.jsx";
+import {
+    useFetchAvailableRoomsQuery,
+    useFetchDashboardDataQuery,
+    useFetchRoomByBranchIdQuery
+} from "../../../store/slices/management/managementApi.jsx";
 import {useOnboardCustomerMutation} from "../../../store/slices/onboard/onboardApi.js";
 import Contact from "./Contact.jsx";
 import BusinessDetails from "./BusinessDetails.jsx";
@@ -106,13 +110,6 @@ const CustomerOnboarding = () => {
 
     const { branches = [] } = managementData || {};
 
-    const { data: fetchRoomByBranch } = useFetchRoomByBranchIdQuery(
-        formData.branch_id,
-        { skip: !formData.branch_id }
-    );
-
-    const roomTypes = useMemo(() => fetchRoomByBranch?.data || [], [fetchRoomByBranch]);
-
     const validateStep = (step) => {
         const newErrors = {};
 
@@ -214,56 +211,6 @@ const CustomerOnboarding = () => {
         }
     };
 
-    const handleRoomSelection = (roomId, quantity = 1) => {
-        const room = roomTypes.find(r => r.id === roomId);
-        if (!room) return;
-
-        setRoomSelection(prev => {
-            const existingIndex = prev.rooms.findIndex(r => r.room_id === roomId);
-            let newRooms = [...prev.rooms];
-
-            const rate = prev.booking_type === 'monthly' ? room.monthly_cost : room.hourly_cost;
-
-            if (existingIndex >= 0) {
-                if (quantity === 0) {
-                    newRooms.splice(existingIndex, 1);
-                } else {
-                    newRooms[existingIndex] = {
-                        ...newRooms[existingIndex],
-                        quantity_booked: quantity,
-                        rate
-                    };
-                }
-            } else if (quantity > 0) {
-                newRooms.push({
-                    room_id: room.id,
-                    room_name: room.room_name,
-                    room_type: room.room_type,
-                    quantity_booked: quantity,
-                    rate,
-                    discount_applied: 0,
-                    hsn: 998313,
-                    auto_priced: true,
-                    allocation_type: room.allocation_type === 'seater' ? 'partial_seats' : 'full_room'
-                });
-            }
-
-            return { ...prev, rooms: newRooms };
-        });
-    };
-
-    const calculateTotal = useMemo(() => {
-        return roomSelection.rooms.reduce((total, room) => {
-            const roomDetails = roomTypes.find(r => r.id === room.room_id);
-            if (!roomDetails) return total;
-
-            const rate = roomSelection.booking_type === 'monthly'
-                ? parseFloat(roomDetails.monthly_cost)
-                : parseFloat(roomDetails.hourly_cost);
-
-            return total + (rate * room.quantity_booked);
-        }, 0);
-    }, [roomSelection, roomTypes]);
 
     const handleNext = useCallback(() => {
         if (validateStep(currentStep)) {
@@ -274,14 +221,14 @@ const CustomerOnboarding = () => {
                         booking_type: roomSelection.booking_type,
                         start_date: roomSelection.start_date,
                         end_date: roomSelection.end_date,
-                        total_amount: calculateTotal,
+                        total_amount:  roomSelection.rooms.reduce((sum, room) => sum + (parseFloat(room.rate) * parseInt(room.quantity_booked)), 0),
                         rooms: roomSelection.rooms
                     }
                 }));
             }
             setCurrentStep(currentStep + 1);
         }
-    },[currentStep, formData, roomSelection, calculateTotal]);
+    },[currentStep, formData, roomSelection]);
 
     const handlePrevious = useCallback(() => {
         setCurrentStep(prev => prev - 1);
@@ -484,11 +431,9 @@ const CustomerOnboarding = () => {
                 return (
                     <RoomBooking
                         {...stepProps}
-                        roomTypes={roomTypes}
                         roomSelection={roomSelection}
                         setRoomSelection={setRoomSelection}
-                        handleRoomSelection={handleRoomSelection}
-                        totalAmount={calculateTotal}
+                        branch_id={formData.branch_id}
                     />
                 );
             case 5:
@@ -496,7 +441,7 @@ const CustomerOnboarding = () => {
             default:
                 return null;
         }
-    }, [currentStep, formData, handleInputChange, errors, branches, roomTypes, roomSelection, handleRoomSelection, calculateTotal]);
+    }, [currentStep, formData, handleInputChange, errors, branches, roomSelection]);
 
     return (
         <Admin>

@@ -33,9 +33,10 @@ export const managementApi = createApi({
         }),
 
         fetchAvailableRooms: builder.query({
-            query: (id) => ({
-                url: `/management/rooms/available/?branch_id=${id}`,
+            query: ({ branch_id, fromDate, toDate }) => ({
+                url: `/management/rooms/available`,
                 method: "GET",
+                params: { branch_id, fromDate, toDate }
             }),
         }),
         fetchDashboardData: builder.query({

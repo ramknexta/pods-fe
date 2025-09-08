@@ -27,10 +27,18 @@ export const customerApi = createApi({
                     method: "GET",
                 })
             }
-        })
+        }),
+        bookRoom: builder.mutation({
+            query: (bookingData) => ({
+                url: `onboard-room-selection/generate-booking`,
+                method: "POST",
+                body: bookingData,
+            }),
+        }),
     })
 })
 
 export const {
     useFetchCustomersQuery,
+    useBookRoomMutation,
 } = customerApi;

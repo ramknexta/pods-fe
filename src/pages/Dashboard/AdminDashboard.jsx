@@ -35,6 +35,13 @@ const Dashboard = () => {
         dispatch(handleTitleChange("Dashboard"));
     },[])
 
+    const {
+        total_branches,
+        total_rooms,
+        total_capacity,
+        total_customers,
+    } = data || {};
+
     const bookings = allocationList?.data?.flatMap(customer =>
         customer?.allocations.map(allocation => {
             const startDate = new Date(allocation.start_date);
@@ -89,16 +96,6 @@ const Dashboard = () => {
             icon: <Icon icon='mdi:currency-inr' className="w-6 h-6 text-yellow-500" />,
         },
     ] : [];
-
-
-    if (!data) return <div>No data available</div>;
-
-    const {
-        total_branches,
-        total_rooms,
-        total_capacity,
-        total_customers,
-    } = data;
 
     const mgmtStats = [
         {

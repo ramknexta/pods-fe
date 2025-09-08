@@ -1,10 +1,67 @@
-import {useMemo} from "react";
+import {useMemo, useState} from "react";
+import { DayPicker } from "react-day-picker";
+import "react-day-picker/dist/style.css";
+import moment from "moment";
+import {useFetchAvailableRoomsQuery} from "../../../store/slices/management/managementApi.jsx";
+import DatePickerModal from "../../../components/model/DatePickerModal.jsx";
 
-const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSelection}) => {
+const RoomBooking = ({roomSelection, setRoomSelection, branch_id}) => {
+    const [checkAvailableDate, setCheckAvailableDate] = useState([])
+    const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
+
+    const { data: fetchRoomByBranch } = useFetchAvailableRoomsQuery(
+        {
+            branch_id,
+            fromDate: roomSelection.start_date ||  moment().format('YYYY-MM-DD'),
+            toDate: roomSelection.end_date || moment().add(1, 'months').format('YYYY-MM-DD'),
+        },
+        { skip: !branch_id, roomSelection }
+    );
+
+    const roomTypes = useMemo(() => fetchRoomByBranch?.data || [], [fetchRoomByBranch]);
+
+    const handleRoomSelection = (roomId, quantity = 1) => {
+        const room = roomTypes.find(r => r.id === roomId);
+        if (!room) return;
+
+        // roomAvailabilityCalendar(room.available_dates || []);
+
+        setRoomSelection(prev => {
+            const existingIndex = prev.rooms.findIndex(r => r.room_id === roomId);
+            let newRooms = [...prev.rooms];
+
+            const rate = prev.booking_type === 'monthly' ? room.monthly_cost : room.hourly_cost;
+
+            if (existingIndex >= 0) {
+                if (quantity === 0) {
+                    newRooms.splice(existingIndex, 1);
+                } else {
+                    newRooms[existingIndex] = {
+                        ...newRooms[existingIndex],
+                        quantity_booked: quantity,
+                        rate
+                    };
+                }
+            } else if (quantity > 0) {
+                newRooms.push({
+                    room_id: room.id,
+                    room_name: room.room_name,
+                    room_type: room.room_type,
+                    quantity_booked: quantity,
+                    rate,
+                    discount_applied: 0,
+                    hsn: 998313,
+                    auto_priced: true,
+                    allocation_type: room.allocation_type === 'seater' ? 'partial_seats' : 'full_room'
+                });
+            }
+
+            return { ...prev, rooms: newRooms };
+        });
+    };
 
     const calculateTotal = () => {
         let total = 0;
-
         roomSelection.rooms.forEach(room => {
             const roomDetails = roomTypes.find(r => r.id === room.room_id);
 
@@ -15,7 +72,6 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                 total += rate * room.quantity_booked;
             }
         });
-
         return total;
     };
 
@@ -26,8 +82,26 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
         return roomTypes.filter(room => room.room_type === roomSelection.room_type);
     }, [roomTypes, roomSelection.room_type]);
 
+
+    const roomAvailabilityCalendar = (available_dates=[]) => {
+
+        const allowedDays = available_dates.flatMap(range => {
+            const start = moment(range.start);
+            const end = moment(range.end);
+            const days = [];
+            while (start.isSameOrBefore(end, "day")) {
+                days.push(start.toDate());
+                start.add(1, "day");
+            }
+            return days;
+        });
+        setIsDatePickerOpen(!isDatePickerOpen)
+        setCheckAvailableDate(allowedDays)
+
+    }
+
     return (
-        <div>
+        <div className='relative'>
             <div className="mb-8">
                 <h2 className="text-2xl font-bold text-gray-900 mb-2">Workspace Reservation</h2>
             </div>
@@ -42,7 +116,7 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                         <select
                             value={roomSelection.booking_type}
                             onChange={(e) => setRoomSelection(prev => ({ ...prev, booking_type: e.target.value }))}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md transition-colors"
                         >
                             <option value="monthly">Monthly</option>
                             <option value="hourly">Hourly</option>
@@ -53,10 +127,10 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                         <label className="block text-sm font-medium text-gray-700 mb-2">Start Date</label>
                         <input
                             type="date"
-                            value={roomSelection.start_date}
+                            value={roomSelection.start_date || moment().format('YYYY-MM-DD')}
                             onChange={(e) => setRoomSelection(prev => ({ ...prev, start_date: e.target.value }))}
-                            min={new Date().toISOString().split('T')[0]}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            min={moment().format('YYYY-MM-DD')}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md transition-colors"
                         />
                     </div>
 
@@ -64,31 +138,19 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                         <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                         <input
                             type="date"
-                            value={roomSelection.end_date}
+                            value={roomSelection.end_date || moment().add(1, 'months').format('YYYY-MM-DD')}
                             onChange={(e) => setRoomSelection(prev => ({ ...prev, end_date: e.target.value }))}
-                            min={roomSelection.start_date || new Date().toISOString().split('T')[0]}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            min={roomSelection.start_date || moment().format('YYYY-MM-DD')}
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md transition-colors"
                         />
                     </div>
 
-                    {/*{roomSelection.booking_type !== 'monthly' && (*/}
-                    {/*    <div>*/}
-                    {/*        <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>*/}
-                    {/*        <input*/}
-                    {/*            type="date"*/}
-                    {/*            value={roomSelection.end_date}*/}
-                    {/*            onChange={(e) => setRoomSelection(prev => ({ ...prev, end_date: e.target.value }))}*/}
-                    {/*            min={roomSelection.start_date || new Date().toISOString().split('T')[0]}*/}
-                    {/*            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"*/}
-                    {/*        />*/}
-                    {/*    </div>*/}
-                    {/*)}*/}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-2">Meeting Type</label>
                         <select
                             value={roomSelection.room_type}
                             onChange={(e) => setRoomSelection(prev => ({ ...prev, room_type: e.target.value }))}
-                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors"
+                            className="w-full px-4 py-2.5 border border-gray-300 rounded-md transition-colors"
                         >
                             <option value="all">All</option>
                             <option value="seater">Seater</option>
@@ -151,42 +213,44 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                                         </div>
                                     </div>
 
-                                    <div className="ml-4 flex flex-col items-end">
-                                        {room.room_type === 'seater' ? (
-                                            <select
-                                                value={quantityBooked}
-                                                onChange={(e) => handleRoomSelection(room.id, parseInt(e.target.value))}
-                                                disabled={room.available_quantity === 0}
-                                                className="border border-gray-300 rounded-md px-3 py-1.5 text-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                                            >
-                                                {Array.from({ length: Math.min(6, (room.available_quantity || 0) + 1) }, (_, i) => i).map(num => (
-                                                    <option key={num} value={num}>{num}</option>
-                                                ))}
-                                            </select>
-                                        ) : (
-                                            <button
-                                                onClick={() => handleRoomSelection(
-                                                    room.id,
-                                                    isSelected ? 0 : 1
-                                                )}
-                                                disabled={room.available_quantity === 0 && !isSelected}
-                                                className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
-                                                    isSelected
-                                                        ? 'bg-red-100 text-red-700 hover:bg-red-200'
-                                                        : room.available_quantity === 0
-                                                            ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                                                            : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
-                                                }`}
-                                            >
-                                                {isSelected ? 'Remove' : room.available_quantity === 0 ? 'Unavailable' : 'Select'}
-                                            </button>
-                                        )}
+                                    <div className="flex flex-col items-end justify-between">
+                                        <div className="ml-4 flex flex-col items-end">
+                                            {room.room_type === 'seater' ? (
+                                                <input
+                                                    type="text"
+                                                    value={quantityBooked || ''}
+                                                    onChange={(e) => handleRoomSelection(room.id, parseInt(e.target.value))}
+                                                    disabled={room.available_quantity === 0}
+                                                    className="border border-gray-300 rounded-md px-3 py-1.5 text-sm w-12"
+                                                />
+                                            ) : (
+                                                <button
+                                                    onClick={() => handleRoomSelection(
+                                                        room.id,
+                                                        isSelected ? 0 : 1
+                                                    )}
+                                                    disabled={room.available_quantity === 0 && !isSelected}
+                                                    className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
+                                                        isSelected
+                                                            ? 'bg-red-100 text-red-700 hover:bg-red-200'
+                                                            : room.available_quantity === 0
+                                                                ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                                                                : 'bg-indigo-100 text-indigo-700 hover:bg-indigo-200'
+                                                    }`}
+                                                >
+                                                    {isSelected ? 'Remove' : room.available_quantity === 0 ? 'Unavailable' : 'Select'}
+                                                </button>
+                                            )}
 
-                                        {quantityBooked > 0 && (
-                                            <div className="mt-2 text-xs text-gray-500 text-right">
-                                                {quantityBooked} selected
-                                            </div>
-                                        )}
+                                            {quantityBooked > 0 && (
+                                                <div className="mt-2 text-xs text-gray-500 text-right">
+                                                    {quantityBooked} selected
+                                                </div>
+                                            )}
+                                        </div>
+                                        <button onClick={() => roomAvailabilityCalendar(room.available_dates)} className="cursor-pointer mt-4 text-xs text-indigo-600 hover:underline">
+                                            Choose Date
+                                        </button>
                                     </div>
                                 </div>
                             </div>
@@ -200,7 +264,7 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                 <div className="mt-8 p-6  rounded-lg border border-gray-200">
                     <h3 className="text-lg font-semibold text-gray-800 mb-4">Booking Summary</h3>
 
-                    <div className="space-y-3 mb-4">
+                    <div className="space-y-3 mb-2">
                         {roomSelection.rooms.filter(room => room.quantity_booked > 0).map(room => {
                             const roomData = roomTypes.find(r => r.id === room.room_id);
                             const rate = roomData ?
@@ -221,12 +285,27 @@ const RoomBooking = ({roomSelection, setRoomSelection, roomTypes, handleRoomSele
                         })}
                     </div>
 
+                    <div>
+                        <span className="font-medium text-secondary text-sm">
+                            {roomSelection.start_date ? moment(roomSelection.start_date).format("DD MMM YYYY") : "N/A"} -{" "}
+                            {roomSelection.end_date ? moment(roomSelection.end_date).format("DD MMM YYYY") : "N/A"}
+                        </span>
+                    </div>
+
                     <div className="flex justify-between items-center pt-3 border-t border-gray-300 font-semibold text-lg">
                         <span className="text-gray-800">Total Amount</span>
                         <span className="text-indigo-700">₹{calculateTotal().toLocaleString('en-IN') || 0}</span>
                     </div>
                 </div>
             )}
+
+            <DatePickerModal
+                isDatePickerOpen={isDatePickerOpen}
+                setIsDatePickerOpen={setIsDatePickerOpen}
+                checkAvailableDate={checkAvailableDate}
+                roomSelection={roomSelection}
+                setRoomSelection={setRoomSelection}
+            />
         </div>
     );
 }

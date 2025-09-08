@@ -81,6 +81,9 @@ const Login = () => {
                 role: result.role,
                 mgmt_id: result.mgmt_id,
                 branch_id: result.branch_id,
+                user_id: result.id,
+                customer_id: result.customer_id,
+                customer_branch_id: result.customer_branch_id,
             }))
 
 

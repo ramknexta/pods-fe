@@ -5,6 +5,9 @@ import Schedule from "./Schedule.jsx";
 import Review from "./Review.jsx";
 import {useSelector} from "react-redux";
 import {useFetchAvailableRoomsQuery} from "../../../store/slices/management/managementApi.jsx";
+import moment from "moment";
+import {useBookRoomMutation} from "../../../store/slices/customer/customerApi.js";
+import toast from "react-hot-toast";
 
 const steps = ["Workspace", "Schedule", "Review", "Success"];
 const header = [
@@ -27,19 +30,36 @@ const header = [
 ]
 
 const CustomerPod = () => {
-    const { branch_id } = useSelector(state => state.auth)
+    const { customer_id, branch_id, customer_branch_id } = useSelector(state => state.auth)
 
     const [pods, setPods] = useState([]);
     const [selectedPod, setSelectedPod] = useState(null);
+    const [selectedSlot, setSelectedSlot] = useState({
+        room_type: 'all',
+        booking_type: 'monthly',
+        start_date: '',
+        end_date: '',
+        rooms: []
+    });
     const [step, setStep] = useState(0);
 
-    const {data: availableRooms} = useFetchAvailableRoomsQuery(branch_id, {skip: !branch_id})
+    const {data: availableRooms, refetch} = useFetchAvailableRoomsQuery(
+        {
+            branch_id,
+            fromDate: moment().format('YYYY-MM-DD'),
+            toDate: moment().add(1, 'months').format('YYYY-MM-DD')
+        },
+        {skip: !branch_id}
+    )
+
+    const [bookRoom, {isLoading: isBooking}] = useBookRoomMutation();
 
     useEffect(() => {
         if (availableRooms?.data){
             setPods(availableRooms.data || [])
         }
     },[availableRooms])
+
 
 
     const handlePodSelect = useCallback(pod => {
@@ -50,24 +70,77 @@ const CustomerPod = () => {
         setSelectedPod(pod);
     },[selectedPod])
 
+    const handleSlotSelect = useCallback(slot => {
+        setSelectedSlot(slot);
+    },[selectedSlot])
 
-    const handleContinue = () => {
+
+
+
+    const handleContinue = async () => {
         if (!selectedPod) return;
-        if (step < steps.length - 1) setStep(step + 1);
+        if (step === 2) {
+            const payload = {
+                customer_id,
+                customer_branch_id,
+                branch_id,
+                start_date: moment(selectedSlot.start_date).format('YYYY-MM-DD'),
+                end_date: moment(selectedSlot.end_date).format('YYYY-MM-DD'),
+                booking_type: selectedSlot.booking_type,
+                selected_rooms: [
+                    {
+                        room_id: selectedPod.id,
+                        room_name: selectedPod.room_name,
+                        room_type: selectedPod.room_type,
+                        quantity_booked: selectedSlot.quantity_booked,
+                        rate: selectedSlot.total_price,
+                        default_discount: selectedPod.default_discount,
+                        hsn: selectedPod.hsn,
+                        auto_priced: true,
+                        allocation_type: selectedPod.allocation_type
+                    }
+                ]
+            }
+            try {
+                const response = await bookRoom(payload).unwrap();
+                if (!response.status) {
+                    toast.error(response.message || "Booking Failed");
+                    return;
+                }
+                toast.success("Pod booked successfully!");
+                refetch();
+
+                setStep(0);
+                setSelectedPod(null);
+                setSelectedSlot({
+                    room_type: 'all',
+                    booking_type: 'monthly',
+                    start_date: '',
+                    end_date: '',
+                    rooms: []
+                });
+
+            } catch (error) {
+                toast.error("Something went wrong while booking");
+            }
+        } else {
+            if (step < steps.length - 1) setStep(step + 1);
+        }
     };
 
     const handleBack = () => {
         if (step > 0) setStep(step - 1);
     };
 
+
     const renderStep = useMemo(() => {
         switch (step) {
             case 0:
                 return <WorkSpace pods={pods} selectedPod={selectedPod} handlePodSelect={handlePodSelect} />;
             case 1:
-                return <Schedule selectedPod={selectedPod} />;
+                return <Schedule selectedPod={selectedPod} handleSlotSelect={handleSlotSelect}/>;
             case 2:
-                return <Review />;
+                return <Review selectedPod={selectedPod} selectedSlot={selectedSlot} onConfirm={handleContinue} onBack={handleBack} />;
             case 3:
                 return <div>Success</div>;
             default:
@@ -93,11 +166,10 @@ const CustomerPod = () => {
                     </p>
                 </header>
 
-                {
-                   renderStep
-                }
+                {renderStep}
 
-                <div className="flex justify-center bottom-4 mt-8">
+
+                <div className="flex justify-center gap-8 bottom-4 mt-8">
                     {step > 0 && (
                         <button
                             onClick={handleBack}
@@ -109,7 +181,7 @@ const CustomerPod = () => {
                     {step < steps.length - 1 ? (
                         <button
                             onClick={handleContinue}
-                            className="bg-blue-600 text-white px-4 py-2 rounded-md"
+                            className="bg-secondary text-sm text-white px-4 py-2 rounded-md"
                         >
                             Continue
                         </button>

@@ -61,11 +61,6 @@ const Sidebar = () => {
             path: '/pod',
             icon: 'tdesign:dashboard-filled'
         },
-        {
-            label: 'Report',
-            path: '/report',
-            icon: 'tdesign:dashboard-filled'
-        },
     ]
 
     const sidebar = role === user.ADMIN ? adminSidebar : customerSidebar;
